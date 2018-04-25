@@ -1,0 +1,18 @@
+#+title: xyheme
+
+* [note]
+
+* [todo-stack]
+
+*** change the syntax from common-lisp back to scheme
+
+*** top level (+fun) & (+theorem)
+
+*** use (<=>) for rewrite instead of (equal)
+
+*** warning incorrect step
+
+    1. incorrect path
+    2. un-effective (<=>)
+
+*** test framework
