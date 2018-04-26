@@ -1,3 +1,105 @@
+;; code taken from a example in chez repo :: ChezScheme/examples/compat.ss
+
+;;; thanks to Michael Lenaghan (MichaelL@frogware.com) for suggesting
+;;; various improvements.
+
+(define-syntax define-macro
+  (lambda (x)
+    (syntax-case x ()
+      [(k (name arg1 ... . args)
+          form1
+          form2
+          ...)
+       #'(k name (arg1 ... . args)
+            form1
+            form2
+            ...)]
+      [(k (name arg1 arg2 ...)
+          form1
+          form2
+          ...)
+       #'(k name (arg1 arg2 ...)
+            form1
+            form2
+            ...)]
+      [(k name args . forms)
+       (identifier? #'name)
+       (letrec ((add-car
+                 (lambda (access)
+                   (case (car access)
+                     ((cdr) `(cadr ,@(cdr access)))
+                     ((cadr) `(caadr ,@(cdr access)))
+                     ((cddr) `(caddr ,@(cdr access)))
+                     ((cdddr) `(cadddr ,@(cdr access)))
+                     (else `(car ,access)))))
+                (add-cdr
+                 (lambda (access)
+                   (case (car access)
+                     ((cdr) `(cddr ,@(cdr access)))
+                     ((cadr) `(cdadr ,@(cdr access)))
+                     ((cddr) `(cdddr ,@(cdr access)))
+                     ((cdddr) `(cddddr ,@(cdr access)))
+                     (else `(cdr ,access)))))
+                (parse
+                 (lambda (l access)
+                   (cond
+                    ((null? l) '())
+                    ((symbol? l) `((,l ,access)))
+                    ((pair? l)
+                     (append!
+                       (parse (car l) (add-car access))
+                       (parse (cdr l) (add-cdr access))))
+                    (else
+                     (syntax-error #'args
+                                   (format "invalid ~s parameter syntax" (datum k))))))))
+         (with-syntax ((proc (datum->syntax-object #'k
+                                                   (let ((g (gensym)))
+                                                     `(lambda (,g)
+                                                        (let ,(parse (datum args) `(cdr ,g))
+                                                          ,@(datum forms)))))))
+           #'(define-syntax name
+               (lambda (x)
+                 (syntax-case x ()
+                   ((k1 . r)
+                    (datum->syntax-object #'k1
+                                          (proc (syntax-object->datum x)))))))))])))
+
+(define-macro (cat-one e)
+  (cond [(and (pair? e)
+              (string? (car e)))
+         (let ([str (car e)]
+               [args (cdr e)])
+           `(format #t ,str . ,args))]
+        [(and (pair? e)
+              (not (string? (car e))))
+         e]
+        [else
+         `(error 'cat-one)]))
+
+(define-macro (cat . l)
+  (if (null? l)
+    `(void)
+    (let* ([h (car l)]
+           [r (cdr l)])
+      `(let ()
+         (cat-one ,h)
+         (cat . ,r)))))
+
+(define-macro (orz who . l)
+  `(let ()
+     (cat ("~%")
+          ("<~a>~%" ,who)
+          (cat . ,l)
+          ("~%")
+          ("</~a>~%" ,who)
+          ("~%"))
+     (error ,who "")))
+
+(define (newline)
+  (cat ("~%")))
+
+(define pp pretty-print)
+
 (define s.car car)
 (define s.cdr cdr)
 (define s.+ +)
@@ -929,25 +1031,37 @@
        ((Q) (natp/size x))
        (() (if-true 't 'nil))))))
 
-(define *claim-list* '())
-
 (define *theorem-list* (prelude))
+
+(define *claim-list* *theorem-list*)
+
+(define (find-def name def-list)
+  (cond [(null? def-list) 'nil]
+        [(eq? (def.name (car def-list)) name)
+         (car def-list)]
+        [else (find-def name (cdr def-list))]))
 
 (define-syntax +fun
   (syntax-rules ()
     ((_ (name arg ...) body)
-     (set! *claim-list*
-           (append
-            *claim-list*
-            (list (quote (defun name (arg ...) body))))))))
+     (+def/help (quote (defun name (arg ...) body))))))
 
 (define-syntax +theorem
   (syntax-rules ()
     ((_ (name arg ...) body)
-     (set! *claim-list*
-           (append
-            *claim-list*
-            (list (quote (dethm name (arg ...) body))))))))
+     (+def/help (quote (dethm name (arg ...) body))))))
+
+(define (+def/help def)
+  (if (find-def (def.name def) *claim-list*)
+    (cat (newline)
+         ("- can not redefine : ~a~%" (def.name def))
+         ("  it has already been defined as :~%")
+         (pp (find-def (def.name def) *claim-list*))
+         (newline))
+    (set! *claim-list*
+          (append
+           *claim-list*
+           (list def)))))
 
 (define-syntax +proof
   (syntax-rules ()
@@ -956,19 +1070,17 @@
                   (quote (exp ...))))))
 
 (define (+proof/help name rest)
-  (let* ([claim (find-def name *claim-list*)]
-         [pf (cons claim rest)]
-         [pfs (list pf)]
-         [result (J-Bob/prove *theorem-list* pfs)])
-    (if (equal result (quote-c 'nil))
-      (quote-c 'nil)
-      (begin
-        (set! *theorem-list*
-              (J-Bob/define *theorem-list* pfs))
-        result))))
-
-(define (find-def name def-list)
-  (cond [(null? def-list) null]
-        [(eq? (car (cdr (car def-list))) name)
-         (car def-list)]
-        [else (find-def name (cdr def-list))]))
+  (if (find-def name *theorem-list*)
+    (cat (newline)
+         ("- theorem `~a` has already been proved ~%" name))
+    (let* ([claim (find-def name *claim-list*)]
+           ;; find-def might return 'nil
+           [pf (cons claim rest)]
+           [pfs (list pf)]
+           [result (J-Bob/prove *theorem-list* pfs)])
+      (if (equal result (quote-c 'nil))
+        (quote-c 'nil)
+        (begin
+          (set! *theorem-list*
+                (J-Bob/define *theorem-list* pfs))
+          result)))))
