@@ -4,11 +4,13 @@
 
 * [todo-stack]
 
-*** change the syntax from common-lisp back to scheme
+*** just make the interface of j-bob easier to use
 
 *** top level (+fun) & (+theorem)
 
 *** use (<=>) for rewrite instead of (equal)
+
+*** add (+type) and (+union)
 
 *** warning incorrect step
 
@@ -16,3 +18,49 @@
     2. un-effective (<=>)
 
 *** test framework
+
+*** structural diff
+
+* example
+
+*** list?
+
+    #+begin_src cicada
+    (+fun (list? x)
+      (if (atom x)
+        (equal x '())
+        (list? (cdr x))))
+
+    (+proof (list? x)
+      (size x)
+      ((Q) (natp/size x))
+      (() (if-true
+            (if (atom x) 't (< (size (cdr x)) (size x)))
+            'nil))
+      ((E) (size/cdr x))
+      (() (if-same (atom x) 't)))
+    #+end_src
+
+*** sub
+
+    #+begin_src cicada
+    (+fun (sub x y)
+      (if (atom y)
+        (if (equal y '?) x y)
+        (cons (sub x (car y))
+              (sub x (cdr y)))))
+
+    (+proof (sub x y)
+      (size y)
+      ((Q) (natp/size y))
+      (() (if-true (if (atom y)
+                     't
+                     (if (< (size (car y)) (size y))
+                       (< (size (cdr y)) (size y))
+                       'nil))
+            'nil))
+      ((E Q) (size/car y))
+      ((E A) (size/cdr y))
+      ((E) (if-true 't 'nil))
+      (() (if-same (atom y) 't)))
+    #+end_src

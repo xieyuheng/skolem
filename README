@@ -1,7 +1,7 @@
 * xyheme
 
-  - xyheme is an ACL2 style theorem prover, with structural diff,
-    embedded in scheme.
+  - xyheme is a programming language
+    and an ACL2 style theorem prover, with structural diff.
 
   - it is inspired by the implementation of J-Bob
     in the little prover, by Daniel P. Friedman and Carl Eastlund.
