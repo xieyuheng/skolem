@@ -1082,3 +1082,69 @@
          ((Q) (natp/size x))
          (() (if-true 't 'nil))))))
   #+end_src
+
+* new interface
+
+*** *claim-list*
+
+    #+begin_src scheme
+    (define *claim-list* '())
+    #+end_src
+
+*** *theorem-list*
+
+    #+begin_src scheme
+    (define *theorem-list* (prelude))
+    #+end_src
+
+*** (+fun)
+
+    #+begin_src scheme
+    (define-syntax +fun
+      (syntax-rules ()
+        ((_ (name arg ...) body)
+         (set! *claim-list*
+               (append
+                *claim-list*
+                (list (quote (defun name (arg ...) body))))))))
+    #+end_src
+
+*** (+theorem)
+
+    #+begin_src scheme
+    (define-syntax +theorem
+      (syntax-rules ()
+        ((_ (name arg ...) body)
+         (set! *claim-list*
+               (append
+                *claim-list*
+                (list (quote (dethm name (arg ...) body))))))))
+    #+end_src
+
+*** (+proof)
+
+    #+begin_src scheme
+    (define-syntax +proof
+      (syntax-rules ()
+        ((_ (name arg ...) exp ...)
+         (+proof/help (quote name)
+                      (quote (exp ...))))))
+
+    (define (+proof/help name rest)
+      (let* ([claim (find-def name *claim-list*)]
+             [pf (cons claim rest)]
+             [pfs (list pf)]
+             [result (J-Bob/prove *theorem-list* pfs)])
+        (if (equal result (quote-c 'nil))
+          (quote-c 'nil)
+          (begin
+            (set! *theorem-list*
+                  (J-Bob/define *theorem-list* pfs))
+            result))))
+
+    (define (find-def name def-list)
+      (cond [(null? def-list) null]
+            [(eq? (car (cdr (car def-list))) name)
+             (car def-list)]
+            [else (find-def name (cdr def-list))]))
+    #+end_src

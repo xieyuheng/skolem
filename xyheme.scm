@@ -928,3 +928,47 @@
        ((A) (if-same (atom x) 't))
        ((Q) (natp/size x))
        (() (if-true 't 'nil))))))
+
+(define *claim-list* '())
+
+(define *theorem-list* (prelude))
+
+(define-syntax +fun
+  (syntax-rules ()
+    ((_ (name arg ...) body)
+     (set! *claim-list*
+           (append
+            *claim-list*
+            (list (quote (defun name (arg ...) body))))))))
+
+(define-syntax +theorem
+  (syntax-rules ()
+    ((_ (name arg ...) body)
+     (set! *claim-list*
+           (append
+            *claim-list*
+            (list (quote (dethm name (arg ...) body))))))))
+
+(define-syntax +proof
+  (syntax-rules ()
+    ((_ (name arg ...) exp ...)
+     (+proof/help (quote name)
+                  (quote (exp ...))))))
+
+(define (+proof/help name rest)
+  (let* ([claim (find-def name *claim-list*)]
+         [pf (cons claim rest)]
+         [pfs (list pf)]
+         [result (J-Bob/prove *theorem-list* pfs)])
+    (if (equal result (quote-c 'nil))
+      (quote-c 'nil)
+      (begin
+        (set! *theorem-list*
+              (J-Bob/define *theorem-list* pfs))
+        result))))
+
+(define (find-def name def-list)
+  (cond [(null? def-list) null]
+        [(eq? (car (cdr (car def-list))) name)
+         (car def-list)]
+        [else (find-def name (cdr def-list))]))
