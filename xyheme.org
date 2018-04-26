@@ -7,6 +7,10 @@
 
 *** (+total) for (+fun), (+proof) for (+theorem)
 
+    - do not check non recursive function
+
+*** switch all the example before ch5 to new syntax
+
 *** use (<=>) for rewrite instead of (equal)
 
 *** add (+type) and (+union)
@@ -19,6 +23,8 @@
 *** test framework
 
 *** structural diff
+
+*** read more about ACL2
 
 * prolog
 
