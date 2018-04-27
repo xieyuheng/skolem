@@ -1044,7 +1044,16 @@
 (define-syntax +fun
   (syntax-rules ()
     ((_ (name arg ...) body)
-     (+def/help (quote (defun name (arg ...) body))))))
+     (begin
+       (+def/help (quote (defun name (arg ...) body)))
+       (total/help (quote (defun name (arg ...) body)))))))
+
+(define (total/help def)
+  (let* ([pfs (list (list def 'nil))]
+         [total-p (J-Bob/prove *theorem-list* pfs)])
+    (when (equal total-p 't)
+      (set! *theorem-list*
+            (J-Bob/define *theorem-list* pfs)))))
 
 (define-syntax +theorem
   (syntax-rules ()
@@ -1084,3 +1093,13 @@
           (set! *theorem-list*
                 (J-Bob/define *theorem-list* pfs))
           result)))))
+
+(define-syntax +total
+  (syntax-rules ()
+    ((_ (name arg ...) exp ...)
+     (+total/help (quote name)
+                  (quote (exp ...))))))
+
+(define +total/help +proof/help)
+
+

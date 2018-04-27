@@ -283,23 +283,11 @@
     (+fun (pair x y)
       (cons x (cons y '())))
 
-    (+proof (pair x y)
-      nil)
-
-
     (+fun (first-of x)
       (car x))
 
-    (+proof (first-of x)
-      nil)
-
-
     (+fun (second-of x)
        (car (cdr x)))
-
-    (+proof (second-of x)
-      nil)
-
 
     (+theorem (first-of-pair a b)
       (equal (first-of (pair a b)) a))
@@ -328,10 +316,6 @@
       (if (equal (first-of xs) '?)
         't
         (equal (second-of xs) '?)))
-
-    (+proof (in-pair? xs)
-      nil)
-
 
     (+theorem (in-first-of-pair b)
       (equal (in-pair? (pair '? b)) 't))

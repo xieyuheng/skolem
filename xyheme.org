@@ -5,10 +5,6 @@
 
 * [todo-stack]
 
-*** (+total) for (+fun), (+proof) for (+theorem)
-
-    - do not check non recursive function
-
 *** switch all the example before ch5 to new syntax
 
 *** use (<=>) for rewrite instead of (equal)
@@ -1237,7 +1233,20 @@
     (define-syntax +fun
       (syntax-rules ()
         ((_ (name arg ...) body)
-         (+def/help (quote (defun name (arg ...) body))))))
+         (begin
+           (+def/help (quote (defun name (arg ...) body)))
+           (total/help (quote (defun name (arg ...) body)))))))
+    #+end_src
+
+*** total/help
+
+    #+begin_src scheme
+    (define (total/help def)
+      (let* ([pfs (list (list def 'nil))]
+             [total-p (J-Bob/prove *theorem-list* pfs)])
+        (when (equal total-p 't)
+          (set! *theorem-list*
+                (J-Bob/define *theorem-list* pfs)))))
     #+end_src
 
 *** (+theorem)
@@ -1293,4 +1302,28 @@
               (set! *theorem-list*
                     (J-Bob/define *theorem-list* pfs))
               result)))))
+    #+end_src
+
+*** (+total)
+
+    #+begin_src scheme
+    (define-syntax +total
+      (syntax-rules ()
+        ((_ (name arg ...) exp ...)
+         (+total/help (quote name)
+                      (quote (exp ...))))))
+    #+end_src
+
+*** +total/help
+
+    #+begin_src scheme
+    (define +total/help +proof/help)
+    #+end_src
+
+* play
+
+*** ><
+
+    #+begin_src scheme
+
     #+end_src
