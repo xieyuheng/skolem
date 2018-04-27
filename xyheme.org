@@ -1,9 +1,9 @@
 #+property: tangle xyheme.scm
 #+title: xyheme
 
-* [note]
-
 * [todo-stack]
+
+*** read the whole imp of j-bob
 
 *** use (<=>) for rewrite instead of (equal)
 
@@ -19,6 +19,8 @@
 *** structural diff
 
 *** read more about ACL2
+
+* [note]
 
 * prolog
 

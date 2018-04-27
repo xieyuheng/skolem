@@ -433,15 +433,15 @@
       (() (equal-same 'nil)))
     #+end_src
 
-* (6. Think It Through)
+* >< (6. Think It Through)
 
-* (7. Oh My, Stars!)
+* >< (7. Oh My, Stars!)
 
-* (8. Learning the Rules)
+* >< (8. Learning the Rules)
 
-* (9. Changing the Rules)
+* >< (9. Changing the Rules)
 
-* (10. The Stars Are Aligned)
+* >< (10. The Stars Are Aligned)
 
 * play
 
