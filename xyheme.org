@@ -5,8 +5,6 @@
 
 * [todo-stack]
 
-*** switch all the example before ch5 to new syntax
-
 *** use (<=>) for rewrite instead of (equal)
 
 *** add (+type) and (+union)
@@ -1318,6 +1316,17 @@
 
     #+begin_src scheme
     (define +total/help +proof/help)
+    #+end_src
+
+*** (step)
+
+    #+begin_src scheme
+    (define-syntax step
+      (syntax-rules ()
+        ((_ exp s ...)
+         (J-Bob/step *theorem-list*
+           (quote exp)
+           (quote (s ...))))))
     #+end_src
 
 * play

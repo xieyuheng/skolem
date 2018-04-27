@@ -2,6 +2,12 @@
 
 * [note]
 
+*** about little books
+
+    - little books are about
+      taking a research insight and think it over
+      until the explanation was accessible to freshman students.
+
 *** prover for dynamic language
 
     - x -
@@ -32,35 +38,28 @@
     - x -
       nevermind
 
-* (Foreword ix)
-
-* (Preface xi)
-
 * (1. Old Games, New Rules)
 
 *** The Axioms of Cons (initial)
 
-    #+begin_src scheme
-    (dethm atom/cons (x y)
+    #+begin_src cicada
+    (+theorem atom/cons (x y)
       (equal (atom (cons x y)) 'nil))
 
-    (+theorem (atom/cons x y)
-      (equal (atom (cons x y)) 'nil))
-
-    (dethm car/cons (x y)
+    (+theorem (car/cons x y)
       (equal (car (cons x y)) x))
 
-    (dethm cdr/cons (x y)
+    (+theorem (cdr/cons x y)
       (equal (cdr (cons x y)) y))
     #+end_src
 
 *** The Axioms of Equal (initial)
 
-    #+begin_src scheme
-    (dethm equal-same (x)
+    #+begin_src cicada
+    (+theorem (equal-same x)
       (equal (equal x x) 't))
 
-    (dethm equal-swap (x y)
+    (+theorem (equal-swap x y)
       (equal (equal x y) (equal y x)))
     #+end_src
 
@@ -85,14 +84,14 @@
 
 *** The Axioms of If (initial)
 
-    #+begin_src scheme
-    (dethm if-true (x y)
+    #+begin_src cicada
+    (+theorem (if-true x y)
       (equal (if 't x y) x))
 
-    (dethm if-false (x y)
+    (+theorem (if-false x y)
       (equal (if 't x y) y))
 
-    (dethm if-same (x y)
+    (+theorem (if-same x y)
       (equal (if x y y) y))
     #+end_src
 
@@ -107,20 +106,20 @@
 
 *** The Axioms of Equal (final)
 
-    #+begin_src scheme
-    (dethm equal-same (x)
+    #+begin_src cicada
+    (+theorem (equal-same x)
       (equal (equal x x) 't))
 
-    (dethm equal-swap (x y)
+    (+theorem (equal-swap x y)
       (equal (equal x y) (equal y x)))
 
-    (dethm equal-if (x y)
+    (+theorem (equal-if x y)
       (if (equal x y) (equal x y) 't))
     #+end_src
 
 *** The Law of Dethm (final)
 
-    - For any theorem (dethm name (x1 . . . xn ) body-x),
+    - For any theorem (+theorem name (x1 . . . xn ) body-x),
       the variables x1 ... xn in body-x can be replaced
       with any corresponding expressions e1 ... en.
       The result, body-e, can be used to rewrite a focus
@@ -161,17 +160,17 @@
 
 *** The Axioms of Cons (final)
 
-    #+begin_src scheme
-    (dethm atom/cons (x y)
+    #+begin_src cicada
+    (+theorem (atom/cons x y)
       (equal (atom (cons x y)) 'nil))
 
-    (dethm car/cons (x y)
+    (+theorem (car/cons x y)
       (equal (car (cons x y)) x))
 
-    (dethm cdr/cons (x y)
+    (+theorem (cdr/cons x y)
       (equal (cdr (cons x y)) y))
 
-    (dethm cons/car+cdr (x)
+    (+theorem (cons/car+cdr x)
       (if (atom x)
         't
         (equal (cons (car x) (cdr x)) x)))
@@ -179,16 +178,16 @@
 
 *** The Axioms of If (final)
 
-    #+begin_src scheme
-    (dethm if-true (x y)
+    #+begin_src cicada
+    (+theorem (if-true x y)
       (equal (if 't x y) x))
 
-    (dethm if-false (x y)
+    (+theorem (if-false x y)
       (equal (if 't x y) y))
 
     ;; 1. eliminate (if) with same A and E
     ;; 2. introduce arbitrary Q
-    (dethm if-same (x y)
+    (+theorem (if-same x y)
       (equal (if x y y) y))
 
     ;; 1. eliminate repeating (if)
@@ -196,7 +195,7 @@
     ;; 2. under the same Q
     ;;    nest-A at (if)
     ;;    introduce arbitrary E
-    (dethm if-nest-A (x y z)
+    (+theorem (if-nest-A x y z)
       (if x (equal (if x y z) y) 't))
 
     ;; 1. eliminate repeating (if)
@@ -204,7 +203,7 @@
     ;; 2. under the same Q
     ;;    nest-E at (if)
     ;;    introduce arbitrary A
-    (dethm if-nest-E (x y z)
+    (+theorem (if-nest-E x y z)
       (if x 't (equal (if x y z) z)))
     #+end_src
 
@@ -219,66 +218,6 @@
 
 *** proofs
 
-    #+begin_src scheme
-    (J-Bob/prove (prelude)
-      '(((defun pair (x y)
-           (cons x (cons y '())))
-         nil)
-        ((defun first-of (x)
-           (car x))
-         nil)
-        ((defun second-of (x)
-           (car (cdr x)))
-         nil)
-        ((dethm first-of-pair (a b)
-           (equal (first-of (pair a b)) a))
-         nil
-         ((1 1) (pair a b))
-         ((1) (first-of (cons a (cons b '()))))
-         ((1) (car/cons a (cons b '())))
-         (() (equal-same a)))
-        ((dethm second-of-pair (a b)
-           (equal (second-of (pair a b)) b))
-         nil
-         ((1 1) (pair a b))
-         ((1) (second-of (cons a (cons b '()))))
-         ((1 1) (cdr/cons a (cons b '())))
-         ((1) (car/cons b '()))
-         (() (equal-same b)))
-        ((defun in-pair? (xs)
-           (if (equal (first-of xs) '?)
-             't
-             (equal (second-of xs) '?)))
-         nil)
-        ((dethm in-first-of-pair (b)
-           (equal (in-pair? (pair '? b)) 't))
-         nil
-         ((1 1) (pair '? b))
-         ((1) (in-pair? (cons '? (cons b '()))))
-         ((1 Q 1) (first-of (cons '? (cons b '()))))
-         ((1 Q 1) (car/cons '? (cons b '())))
-         ((1 Q) (equal-same '?))
-         ((1) (if-true
-               't
-               (equal (second-of (cons '? (cons b '()))) '?)))
-         (() (equal-same 't)))
-        ((dethm in-second-of-pair (a)
-           (equal (in-pair? (pair a '?)) 't))
-         nil
-         ((1 1) (pair a '?))
-         ((1) (in-pair? (cons a (cons '? '()))))
-         ((1 Q 1) (first-of (cons a (cons '? '()))))
-         ((1 Q 1) (car/cons a (cons '? '())))
-         ((1 E 1) (second-of (cons a (cons '? '()))))
-         ((1 E 1 1) (cdr/cons a (cons '? '())))
-         ((1 E 1) (car/cons '? '()))
-         ((1 E) (equal-same '?))
-         ((1) (if-same (equal a '?) 't))
-         (() (equal-same 't)))))
-    #+end_src
-
-*** >< proofs
-
     #+begin_src cicada
     (+fun (pair x y)
       (cons x (cons y '())))
@@ -287,10 +226,10 @@
       (car x))
 
     (+fun (second-of x)
-       (car (cdr x)))
+      (car (cdr x)))
 
     (+theorem (first-of-pair a b)
-      (equal (first-of (pair a b)) a))
+       (equal (first-of (pair a b)) a))
 
     (+proof (first-of-pair a b)
       nil
@@ -299,9 +238,8 @@
       ((1) (car/cons a (cons b '())))
       (() (equal-same a)))
 
-
     (+theorem (second-of-pair a b)
-      (equal (second-of (pair a b)) b))
+       (equal (second-of (pair a b)) b))
 
     (+proof (second-of-pair a b)
       nil
@@ -311,14 +249,13 @@
       ((1) (car/cons b '()))
       (() (equal-same b)))
 
-
     (+fun (in-pair? xs)
       (if (equal (first-of xs) '?)
         't
         (equal (second-of xs) '?)))
 
     (+theorem (in-first-of-pair b)
-      (equal (in-pair? (pair '? b)) 't))
+       (equal (in-pair? (pair '? b)) 't))
 
     (+proof (in-first-of-pair b)
       nil
@@ -331,7 +268,6 @@
              't
              (equal (second-of (cons '? (cons b '()))) '?)))
       (() (equal-same 't)))
-
 
     (+theorem (in-second-of-pair a)
       (equal (in-pair? (pair a '?)) 't))
@@ -362,49 +298,53 @@
 
 *** The Axioms of Size
 
-    #+begin_src scheme
-    (dethm natp/size (x)
+    #+begin_src cicada
+    (+theorem (natp/size x)
       (equal (natp (size x)) 't))
 
-    (dethm size/car (x)
+    (+theorem (size/car x)
       (if (atom x) 't (equal (< (size (car x)) (size x)) 't)))
 
-    (dethm size/cdr (x)
+    (+theorem (size/cdr x)
       (if (atom x) 't (equal (< (size (cdr x)) (size x)) 't)))
     #+end_src
 
 *** proofs
 
-    #+begin_src scheme
-    (J-Bob/prove (prelude)
-      '(((defun list? (x)
-           (if (atom x)
-             (equal x '())
-             (list? (cdr x))))
-         (size x)
-         ((Q) (natp/size x))
-         (() (if-true
-              (if (atom x) 't (< (size (cdr x)) (size x)))
-              'nil))
-         ((E) (size/cdr x))
-         (() (if-same (atom x) 't)))
-        ((defun sub (x y)
-           (if (atom y)
-             (if (equal y '?) x y)
-             (cons (sub x (car y))
-                   (sub x (cdr y)))))
-         (size y)
-         ((Q) (natp/size y))
-         (() (if-true (if (atom y)
-                        't
-                        (if (< (size (car y)) (size y))
-                          (< (size (cdr y)) (size y))
-                          'nil))
-                      'nil))
-         ((E Q) (size/car y))
-         ((E A) (size/cdr y))
-         ((E) (if-true 't 'nil))
-         (() (if-same (atom y) 't)))))
+    #+begin_src cicada
+    (+fun (list? x)
+      (if (atom x)
+        (equal x '())
+        (list? (cdr x))))
+
+    (+total (list? x)
+      (size x)
+      ((Q) (natp/size x))
+      (() (if-true
+            (if (atom x) 't (< (size (cdr x)) (size x)))
+            'nil))
+      ((E) (size/cdr x))
+      (() (if-same (atom x) 't)))
+
+    (+fun (sub x y)
+      (if (atom y)
+        (if (equal y '?) x y)
+        (cons (sub x (car y))
+              (sub x (cdr y)))))
+
+    (+total (sub x y)
+      (size y)
+      ((Q) (natp/size y))
+      (() (if-true (if (atom y)
+                     't
+                     (if (< (size (car y)) (size y))
+                       (< (size (cdr y)) (size y))
+                       'nil))
+            'nil))
+      ((E Q) (size/car y))
+      ((E A) (size/cdr y))
+      ((E) (if-true 't 'nil))
+      (() (if-same (atom y) 't)))
     #+end_src
 
 * (5. Think It Over, and Over, and Over)
@@ -427,63 +367,70 @@
 
 *** proofs
 
-    #+begin_src scheme
-    (J-Bob/prove (prelude)
-      '(((defun memb? (xs)
-           (if (atom xs)
-             'nil
-             (if (equal (car xs) '?)
-               't
-               (memb? (cdr xs)))))
-         (size xs)
-         ((Q) (natp/size xs))
-         (()
-          (if-true
-           (if (atom xs)
+    #+begin_src cicada
+    (+fun (memb? xs)
+      (if (atom xs)
+        'nil
+        (if (equal (car xs) '?)
+          't
+          (memb? (cdr xs)))))
+
+    (+total (memb? xs)
+      (size xs)
+      ((Q) (natp/size xs))
+      (()
+       (if-true
+         (if (atom xs)
+           't
+           (if (equal (car xs) '?)
              't
-             (if (equal (car xs) '?)
-               't
-               (< (size (cdr xs)) (size xs))))
-           'nil))
-         ((E E) (size/cdr xs))
-         ((E) (if-same (equal (car xs) '?) 't))
-         (() (if-same (atom xs) 't)))
-        ((defun remb (xs)
-           (if (atom xs)
-             '()
-             (if (equal (car xs) '?)
-               (remb (cdr xs))
-               (cons (car xs)
-                     (remb (cdr xs))))))
-         (size xs)
-         ((Q) (natp/size xs))
-         (()
-          (if-true
-           (if (atom xs) 't (< (size (cdr xs)) (size xs)))
-           'nil))
-         ((E) (size/cdr xs))
-         (() (if-same (atom xs) 't)))
-        ((dethm memb?/remb0 ()
-           (equal (memb? (remb '())) 'nil))
-         nil
-         ((1 1) (remb '()))
-         ((1 1 Q) (atom '()))
-         ((1 1)
-          (if-true
-           '()
-           (if (equal (car '()) '?)
-             (remb (cdr '()))
-             (cons (car '()) (remb (cdr '()))))))
-         ((1) (memb? '()))
-         ((1 Q) (atom '()))
-         ((1)
-          (if-true
-           'nil
-           (if
-               (equal (car '()) '?)
-             't
-             (memb? (cdr '())))))
-         (() (equal-same 'nil)))))
+             (< (size (cdr xs)) (size xs))))
+         'nil))
+      ((E E) (size/cdr xs))
+      ((E) (if-same (equal (car xs) '?) 't))
+      (() (if-same (atom xs) 't)))
+
+    (+fun (remb xs)
+      (if (atom xs)
+        '()
+        (if (equal (car xs) '?)
+          (remb (cdr xs))
+          (cons (car xs)
+                (remb (cdr xs))))))
+
+    (+total (remb xs)
+      (size xs)
+      ((Q) (natp/size xs))
+      (()
+       (if-true
+         (if (atom xs) 't (< (size (cdr xs)) (size xs)))
+         'nil))
+      ((E) (size/cdr xs))
+      (() (if-same (atom xs) 't)))
+
+    (+theorem (memb?/remb0)
+      (equal (memb? (remb '())) 'nil))
+
+    (+proof (memb?/remb0)
+      nil
+      ((1 1) (remb '()))
+      ((1 1 Q) (atom '()))
+      ((1 1)
+       (if-true
+         '()
+         (if (equal (car '()) '?)
+           (remb (cdr '()))
+           (cons (car '()) (remb (cdr '()))))))
+      ((1) (memb? '()))
+      ((1 Q) (atom '()))
+      ((1)
+       (if-true
+         'nil
+         (if
+           (equal (car '()) '?)
+           't
+           (memb? (cdr '())))))
+      (() (equal-same 'nil)))
     #+end_src
 
 * (6. Think It Through)
@@ -496,352 +443,89 @@
 
 * (10. The Stars Are Aligned)
 
-* (A. Recess)
+* play
 
-*** J-Bob/step
+*** step
 
-    #+begin_src scheme
-    (J-Bob/step (prelude)
-      '(car (cons 'ham '(cheese)))
-      '())
+    #+begin_src cicada
+    (step
+      (car (cons 'ham '(cheese))))
 
-    (J-Bob/step (prelude)
-      '(car (cons 'ham '(cheese)))
-      '((() (car/cons 'ham '(cheese)))))
+    (step
+      (car (cons 'ham '(cheese)))
+      (() (car/cons 'ham '(cheese))))
 
     ;; thm and fun both can be used to do rewrite
     ;;   in the following
     ;;   (atom/cons a b) is a thm
     ;;   (equal 'flapjack 'nil) is a fun
-    (J-Bob/step (prelude)
-      '(equal 'flapjack (atom (cons a b)))
-      '(((2) (atom/cons a b))
-        (() (equal 'flapjack 'nil))))
+    (step
+      (equal 'flapjack (atom (cons a b)))
+      ((2) (atom/cons a b))
+      (() (equal 'flapjack 'nil)))
 
-    (J-Bob/step (prelude)
-      '(atom (cdr (cons (car (cons p q)) '())))
-      '(((1 1 1) (car/cons p q))
-        ((1) (cdr/cons p '()))
-        (() (atom '()))))
+    (step
+      (atom (cdr (cons (car (cons p q)) '())))
+      ((1 1 1) (car/cons p q))
+      ((1) (cdr/cons p '()))
+      (() (atom '())))
 
-    (J-Bob/step (prelude)
-      '(if a c c)
-      '())
+    (step
+      (if a c c))
 
-    (J-Bob/step (prelude)
-      '(if a c c)
-      '((() (if-same a c))))
+    (step
+      (if a c c)
+      (() (if-same a c)))
 
-    (J-Bob/step (prelude)
-      '(if a c c)
-      '((() (if-same a c))
-        (() (if-same
-             (if (equal a 't)
-               (if (equal 'nil 'nil) a b)
-               (equal 'or
-                      (cons 'black '(coffee))))
-             c))))
+    (step
+      (if a c c)
+      (() (if-same a c))
+      (() (if-same
+           (if (equal a 't)
+             (if (equal 'nil 'nil) a b)
+             (equal 'or
+                    (cons 'black '(coffee))))
+           c)))
 
-    (J-Bob/step (prelude)
-      '(if a c c)
-      '((() (if-same a c))
-        (() (if-same
-             (if (equal a 't)
-               (if (equal 'nil 'nil)
-                 a
-                 b)
-               (equal 'or
-                      (cons 'black '(coffee))))
-             c))
-        ((Q E 2) (cons 'black '(coffee)))))
+    (step
+      (if a c c)
+      (() (if-same a c))
+      (() (if-same
+           (if (equal a 't)
+             (if (equal 'nil 'nil)
+               a
+               b)
+             (equal 'or
+                    (cons 'black '(coffee))))
+           c))
+      ((Q E 2) (cons 'black '(coffee))))
 
-    (J-Bob/step (prelude)
-      '(if a c c)
-      '((() (if-same a c))
-        (() (if-same
-             (if (equal a 't)
-               (if (equal 'nil 'nil)
-                 a
-                 b)
-               (equal 'or
-                      (cons 'black '(coffee))))
-             c))
-        ((Q E 2) (cons 'black '(coffee)))
-        ((Q A Q) (equal-same 'nil))))
+    (step
+      (if a c c)
+      (() (if-same a c))
+      (() (if-same
+           (if (equal a 't)
+             (if (equal 'nil 'nil)
+               a
+               b)
+             (equal 'or
+                    (cons 'black '(coffee))))
+           c))
+      ((Q E 2) (cons 'black '(coffee)))
+      ((Q A Q) (equal-same 'nil)))
 
-    (J-Bob/step (prelude)
-      '(if a c c)
-      '((() (if-same a c))
-        (() (if-same
-             (if (equal a 't)
-               (if (equal 'nil 'nil)
-                 a
-                 b)
-               (equal 'or
-                      (cons 'black '(coffee))))
-             c))
-        ((Q E 2) (cons 'black '(coffee)))
-        ((Q A Q) (equal-same 'nil))
-        ((Q A) (if-true a b))))
+    (step
+      (if a c c)
+      (() (if-same a c))
+      (() (if-same
+           (if (equal a 't)
+             (if (equal 'nil 'nil)
+               a
+               b)
+             (equal 'or
+                    (cons 'black '(coffee))))
+           c))
+      ((Q E 2) (cons 'black '(coffee)))
+      ((Q A Q) (equal-same 'nil))
+      ((Q A) (if-true a b)))
     #+end_src
-
-*** J-Bob/prove
-
-    #+begin_src scheme
-    (J-Bob/prove (prelude)
-      '())
-
-    (J-Bob/prove (prelude)
-      '(((defun pair (x y)
-           (cons x (cons y '())))
-         nil)))
-
-    (J-Bob/prove (prelude)
-      '(((defun pair (x y)
-           (cons x (cons y '())))
-         nil)
-        ((defun first-of (x)
-           (car x))
-         nil)
-        ((defun second-of (x)
-           (car (cdr x)))
-         nil)))
-
-    (J-Bob/prove (prelude)
-      '(((defun pair (x y)
-           (cons x (cons y '())))
-         nil)
-        ((defun first-of (x)
-           (car x))
-         nil)
-        ((defun second-of (x)
-           (car (cdr x)))
-         nil)
-        ((dethm first-of-pair (a b)
-           (equal (first-of (pair a b)) a))
-         nil
-         ((1 1) (pair a b))
-         ((1) (first-of (cons a (cons b '()))))
-         ((1) (car/cons a (cons b '())))
-         (() (equal-same a)))))
-
-    (J-Bob/prove (prelude)
-      '(((defun pair (x y)
-           (cons x (cons y '())))
-         nil)
-        ((defun first-of (x)
-           (car x))
-         nil)
-        ((defun second-of (x)
-           (car (cdr x)))
-         nil)
-        ((dethm first-of-pair (a b)
-           (equal (first-of (pair a b)) a))
-         nil
-         ((1 1) (pair a b))
-         ((1) (first-of (cons a (cons b '()))))
-         ((1) (car/cons a (cons b '())))
-         (() (equal-same a)))
-        ((dethm second-of-pair (a b)
-           (equal (second-of (pair a b)) b))
-         nil
-         ((1 1) (pair a b))
-         ((1) (second-of (cons a (cons b '()))))
-         ((1 1) (cdr/cons a (cons b '())))
-         ((1) (car/cons b '()))
-         (() (equal-same b)))))
-
-    (J-Bob/prove (prelude)
-      '(((defun pair (x y)
-           (cons x (cons y '())))
-         nil)
-        ((defun first-of (x)
-           (car x))
-         nil)
-        ((defun second-of (x)
-           (car (cdr x)))
-         nil)
-        ((dethm first-of-pair (a b)
-           (equal (first-of (pair a b)) a))
-         nil
-         ((1 1) (pair a b))
-         ((1) (first-of (cons a (cons b '()))))
-         ((1) (car/cons a (cons b '())))
-         (() (equal-same a)))
-        ((dethm second-of-pair (a b)
-           (equal (second-of (pair a b)) b))
-         nil
-         ((1 1) (pair a b))
-         ((1) (second-of (cons a (cons b '()))))
-         ((1 1) (cdr/cons a (cons b '())))
-         ((1) (car/cons b '()))
-         (() (equal-same b)))))
-    #+end_src
-
-*** J-Bob/define
-
-    #+begin_src scheme
-    (defun prelude+first-of-pair ()
-      (J-Bob/define (prelude)
-        '(((defun pair (x y)
-             (cons x (cons y '())))
-           nil)
-          ((defun first-of (x)
-             (car x))
-           nil)
-          ((defun second-of (x)
-             (car (cdr x)))
-           nil)
-          ((dethm first-of-pair (a b)
-             (equal (first-of (pair a b)) a))
-           nil
-           ((1 1) (pair a b))
-           ((1) (first-of (cons a (cons b '()))))
-           ((1) (car/cons a (cons b '())))
-           (() (equal-same a))))))
-
-    ;; we can provide several proof attempts without finishing them
-    ;;   J-Bob/prove shows us the expression
-    ;;   from the last unfinished proof attempt,
-    ;;   but we must finish all the proofs to get ''t
-    (J-Bob/prove (prelude+first-of-pair)
-      '(((dethm second-of-pair (a b)
-           (equal (second-of (pair a b)) b))
-         nil)
-        ((defun in-pair? (xs)
-           (if (equal (first-of xs) '?)
-             't
-             (equal (second-of xs) '?)))
-         nil)
-        ((dethm in-first-of-pair (b)
-           (equal (in-pair? (pair '? b)) 't))
-         nil)
-        ((dethm in-second-of-pair (a)
-           (equal (in-pair? (pair a '?)) 't))
-         nil)))
-    #+end_src
-
-*** about seed
-
-* (D. Restless for More?)
-
-*** other provers
-
-    - Agda (http://wiki.portal.chalmers.se/agda/)
-    - Coq (http://coq.inria.fr/)
-    - Isabelle/HOL (http://www.cl.cam.ac.uk/research/hvg/Isabelle/)
-    - PVS (http://pvs.csl.sri.com/)
-    - Twelf (http://twelf.org/)
-
-*** the use of recursion in logic
-
-    - The modern founder of the use of recursion in Logic
-      is Thoralf Albert Skolem.
-      In Skolem’s 1919 paper (published in 1923),
-      he observed that one could use the recursive mode of thought
-      to avoid “some” used in Whitehead and Russell’s Principia Mathematica.
-      The ideas of this paper were important
-      to the development of the Boyer-Moore Theorem Prover.
-
-*** references
-
-    - R. S. Boyer and J S. Moore.
-
-      A Computational Logic.
-
-      Academic Press, Inc., New York, 1979.
-
-    - A. Chlipala.
-
-      Certified Programming with Dependent Types.
-
-      MIT Press, 2013.
-
-    - J. N. Crossley, C. J. Ash, C. J. Brickhill,
-      J. C. Stillwell, and N. H. Williams.
-
-      What is Mathematical Logic?
-
-      Oxford University Press, 1972.
-
-    - M. Kaufmann, P. Manolios, and J S. Moore.
-
-      Computer Aided Reasoning: An Approach.
-
-      Kluwer Academic Publishers, 2000.
-
-    - D. MacKenzie.
-
-      Mechanizing Proof: Computing, Risk, and Trust.
-
-      MIT Press, 2004.
-
-    - J. McCarthy.
-
-      A Basis for a Mathematical Theory of Computation.
-
-      In P. Braffort and D. Hershberg (Eds.),
-      Computer Programming and Formal Systems.
-      North-Holland Publishing Company, Amsterdam,
-      The Netherlands, 1963.
-
-    - E. Mendelson.
-
-      Introduction to Mathematical Logic.
-
-      D. Van Nostrand Company, Inc.,
-      Princeton, New Jersey, 1964.
-
-    - R. Péter.
-
-      Recursive Functions Third Revised Edition.
-
-      Academic Press, New York, 1967.
-
-    - Pierce, B. C., et al.
-
-      Software Foundations.
-
-      http://www.cis.upenn.edu/~bcpierce/sf (2010-2015).
-
-    - T. A. Skolem.
-
-      The foundations of elementary arithmetic
-      established by means of the recursive mode of thought,
-      without the use of apparent variables
-      ranging over infinite domains,
-
-      in From Frege to Gödel: A Source Book in Mathematical Logic,
-      1879–1931 (Jean van Heijenoort, ed.),
-      pages 302–333. Harvard Univ. Press, 1967.
-      Paper written in 1919 and appeared in published form in 1923.
-
-    - P. Suppes.
-
-      Introduction to Logic.
-
-      D. Van Nostrand Company, Inc., Princeton, New Jersey, 1957.
-
-    - M. Wand.
-
-      Induction, Recursion, and Programming.
-
-      Elsevier North Holland, Inc., 1980.
-
-    - A. N. Whitehead and B. Russell.
-
-      Principia Mathematica.
-
-      Cambridge: Cambridge University Press,
-      in 3 vols, 1910, 1912, 1913.
-      Second edition, 1925 (Vol. 1), 1927 (Vols 2, 3).
-      Abridged as Principia Mathematica to *56,
-      Cambridge University Press, 1962.
-
-* (Afterword 221)
-
-  - little books are about
-    taking a research insight and think it over
-    until the explanation was accessible to freshman students.
-
-* (Index 222)

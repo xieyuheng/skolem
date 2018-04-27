@@ -1,0 +1,114 @@
+* (D. Restless for More?)
+
+*** other provers
+
+    - Agda (http://wiki.portal.chalmers.se/agda/)
+    - Coq (http://coq.inria.fr/)
+    - Isabelle/HOL (http://www.cl.cam.ac.uk/research/hvg/Isabelle/)
+    - PVS (http://pvs.csl.sri.com/)
+    - Twelf (http://twelf.org/)
+
+*** the use of recursion in logic
+
+    - The modern founder of the use of recursion in Logic
+      is Thoralf Albert Skolem.
+      In Skolem’s 1919 paper (published in 1923),
+      he observed that one could use the recursive mode of thought
+      to avoid “some” used in Whitehead and Russell’s Principia Mathematica.
+      The ideas of this paper were important
+      to the development of the Boyer-Moore Theorem Prover.
+
+*** references
+
+    - R. S. Boyer and J S. Moore.
+
+      A Computational Logic.
+
+      Academic Press, Inc., New York, 1979.
+
+    - A. Chlipala.
+
+      Certified Programming with Dependent Types.
+
+      MIT Press, 2013.
+
+    - J. N. Crossley, C. J. Ash, C. J. Brickhill,
+      J. C. Stillwell, and N. H. Williams.
+
+      What is Mathematical Logic?
+
+      Oxford University Press, 1972.
+
+    - M. Kaufmann, P. Manolios, and J S. Moore.
+
+      Computer Aided Reasoning: An Approach.
+
+      Kluwer Academic Publishers, 2000.
+
+    - D. MacKenzie.
+
+      Mechanizing Proof: Computing, Risk, and Trust.
+
+      MIT Press, 2004.
+
+    - J. McCarthy.
+
+      A Basis for a Mathematical Theory of Computation.
+
+      In P. Braffort and D. Hershberg (Eds.),
+      Computer Programming and Formal Systems.
+      North-Holland Publishing Company, Amsterdam,
+      The Netherlands, 1963.
+
+    - E. Mendelson.
+
+      Introduction to Mathematical Logic.
+
+      D. Van Nostrand Company, Inc.,
+      Princeton, New Jersey, 1964.
+
+    - R. Péter.
+
+      Recursive Functions Third Revised Edition.
+
+      Academic Press, New York, 1967.
+
+    - Pierce, B. C., et al.
+
+      Software Foundations.
+
+      http://www.cis.upenn.edu/~bcpierce/sf (2010-2015).
+
+    - T. A. Skolem.
+
+      The foundations of elementary arithmetic
+      established by means of the recursive mode of thought,
+      without the use of apparent variables
+      ranging over infinite domains,
+
+      in From Frege to Gödel: A Source Book in Mathematical Logic,
+      1879–1931 (Jean van Heijenoort, ed.),
+      pages 302–333. Harvard Univ. Press, 1967.
+      Paper written in 1919 and appeared in published form in 1923.
+
+    - P. Suppes.
+
+      Introduction to Logic.
+
+      D. Van Nostrand Company, Inc., Princeton, New Jersey, 1957.
+
+    - M. Wand.
+
+      Induction, Recursion, and Programming.
+
+      Elsevier North Holland, Inc., 1980.
+
+    - A. N. Whitehead and B. Russell.
+
+      Principia Mathematica.
+
+      Cambridge: Cambridge University Press,
+      in 3 vols, 1910, 1912, 1913.
+      Second edition, 1925 (Vol. 1), 1927 (Vols 2, 3).
+      Abridged as Principia Mathematica to *56,
+      Cambridge University Press, 1962.

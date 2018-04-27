@@ -1102,4 +1102,11 @@
 
 (define +total/help +proof/help)
 
+(define-syntax step
+  (syntax-rules ()
+    ((_ exp s ...)
+     (J-Bob/step *theorem-list*
+       (quote exp)
+       (quote (s ...))))))
+
 
