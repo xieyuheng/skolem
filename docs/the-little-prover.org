@@ -677,15 +677,155 @@
 
 * (8. Learning the Rules)
 
+*** member?
+
+    #+begin_src cicada
+    (+fun (member? x ys)
+      (if (atom ys)
+        'nil
+        (if (equal x (car ys))
+          't
+          (member? x (cdr ys)))))
+
+    (+total (member? x ys)
+      (size ys)
+      ;; (if (natp (size ys))
+      ;;   (if (atom ys)
+      ;;     't
+      ;;     (if (equal x (car ys))
+      ;;       't
+      ;;       (< (size (cdr ys)) (size ys))))
+      ;;   'nil)
+      ((Q) (natp/size ys))
+      (()
+       (if-true
+         (if (atom ys)
+           't
+           (if (equal x (car ys)) 't (< (size (cdr ys)) (size ys))))
+         'nil))
+      ((E E) (size/cdr ys))
+      ((E) (if-same (equal x (car ys)) 't))
+      (() (if-same (atom ys) 't)))
+    #+end_src
+
+*** set?
+
+    #+begin_src cicada
+    (+fun (set? xs)
+      (if (atom xs)
+        't
+        (if (member? (car xs) (cdr xs))
+          'nil
+          (set? (cdr xs)))))
+
+    (+total (set? xs)
+      (size xs)
+      ;; (if (natp (size xs))
+      ;;   (if (atom xs)
+      ;;     't
+      ;;     (if (member? (car xs) (cdr xs))
+      ;;       't
+      ;;       (< (size (cdr xs)) (size xs))))
+      ;;   'nil)
+      ((Q) (natp/size xs))
+      (()
+       (if-true
+         (if (atom xs)
+           't
+           (if (member? (car xs) (cdr xs))
+             't
+             (< (size (cdr xs)) (size xs))))
+         'nil))
+      ((E E) (size/cdr xs))
+      ((E) (if-same (member? (car xs) (cdr xs)) 't))
+      (() (if-same (atom xs) 't)))
+    #+end_src
+
+*** add-atoms
+
+    #+begin_src cicada
+    (+fun (add-atoms x ys)
+      (if (atom x)
+        (if (member? x ys)
+          ys
+          (cons x ys))
+        (add-atoms
+         (car x)
+         (add-atoms (cdr x) ys))))
+
+    (+total (add-atoms x ys)
+      (size x)
+      ;; (if (natp (size x))
+      ;;   (if (atom x)
+      ;;     't
+      ;;     (if (< (size (car x)) (size x))
+      ;;       (< (size (cdr x)) (size x))
+      ;;       'nil))
+      ;;   'nil)
+      ((Q) (natp/size x))
+      (() (if-true
+            (if (atom x)
+              't
+              (if (< (size (car x)) (size x))
+                (< (size (cdr x)) (size x))
+                'nil))
+            'nil))
+      ((E Q) (size/car x))
+      ((E A) (size/cdr x))
+      ((E) (if-true 't 'nil))
+      (() (if-same (atom x) 't)))
+    #+end_src
+
+*** atoms
+
+    #+begin_src cicada
+    (+fun (atoms x)
+      (add-atoms x '()))
+    #+end_src
+
+*** Conjunction
+
+    - The conjunction of expressions [e1 ... en] states that
+      each of [e1 ... en] must be true.
+
+    - The conjunction of zero expressions is 't.
+
+    - The conjunction of one expression e1 is e1.
+
+    - The conjunction of e1 and e2 is (if e1 e2 'nil).
+
+    - The conjunction of three or more expressions
+      [e1 e2 ... en] is the conjunction of e1
+      and the conjunction of [e2 ... en].
+
+*** >< Constructing Totality Claims
+
+    - Given a function (defun name (x1 ... x ) body)
+      and a measure,
+      construct a claim for subexpressions in body :
+
+      - For variables and quoted literals, use 't.
+
+      - ><><><
+
+      - The totality claim for name
+        is the conjunction of (natp m) and the claim for body.
+
+* >< (9. Changing the Rules)
+
 *** ><
 
     #+begin_src cicada
 
     #+end_src
 
-* >< (9. Changing the Rules)
-
 * >< (10. The Stars Are Aligned)
+
+*** ><
+
+    #+begin_src cicada
+
+    #+end_src
 
 * play
 

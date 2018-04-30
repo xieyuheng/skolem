@@ -22,6 +22,8 @@
 
 * [note]
 
+*** be able to name rewritting steps
+
 * prolog
 
 *** define-macro
