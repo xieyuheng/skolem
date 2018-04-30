@@ -1031,7 +1031,8 @@
        ((Q) (natp/size x))
        (() (if-true 't 'nil))))))
 
-(define *theorem-list* (prelude))
+;; (define *theorem-list* (prelude))
+(define *theorem-list* '())
 
 (define *claim-list* *theorem-list*)
 
@@ -1067,10 +1068,7 @@
          ("  it has already been defined as :~%")
          (pp (find-def (def.name def) *claim-list*))
          (newline))
-    (set! *claim-list*
-          (append
-           *claim-list*
-           (list def)))))
+    (set! *claim-list* (append *claim-list* (list def)))))
 
 (define-syntax +proof
   (syntax-rules ()
@@ -1109,4 +1107,119 @@
        (quote exp)
        (quote (s ...))))))
 
+(define *axiom-list* '())
 
+(define-syntax +axiom
+  (syntax-rules ()
+    ((_ (name arg ...) body)
+     (+axiom/help (quote (dethm name (arg ...) body))))))
+
+(define (+axiom/help def)
+  (set! *axiom-list* (append *axiom-list* (list def)))
+  (set! *claim-list* (append *claim-list* (list def)))
+  (set! *theorem-list* (append *theorem-list* (list def))))
+
+(+axiom (atom/cons x y)
+  (equal (atom (cons x y)) 'nil))
+
+(+axiom (car/cons x y)
+  (equal (car (cons x y)) x))
+
+(+axiom (cdr/cons x y)
+  (equal (cdr (cons x y)) y))
+
+(+axiom (equal-same x)
+  (equal (equal x x) 't))
+
+(+axiom (equal-swap x y)
+  (equal (equal x y) (equal y x)))
+
+(+axiom (if-same x y)
+  (equal (if x y y) y))
+
+(+axiom (if-true x y)
+  (equal (if 't x y) x))
+
+(+axiom (if-false x y)
+  (equal (if 'nil x y) y))
+
+(+axiom (if-nest-E x y z)
+  (if x 't (equal (if x y z) z)))
+
+(+axiom (if-nest-A x y z)
+  (if x (equal (if x y z) y) 't))
+
+(+axiom (cons/car+cdr x)
+  (if (atom x)
+    't
+    (equal (cons (car x) (cdr x)) x)))
+
+(+axiom (equal-if x y)
+  (if (equal x y) (equal x y) 't))
+
+(+axiom (natp/size x)
+  (equal (natp (size x)) 't))
+
+(+axiom (size/car x)
+  (if (atom x)
+    't
+    (equal (< (size (car x)) (size x)) 't)))
+
+(+axiom (size/cdr x)
+  (if (atom x)
+    't
+    (equal (< (size (cdr x)) (size x)) 't)))
+
+(+axiom (associate-+ a b c)
+  (equal (+ (+ a b) c) (+ a (+ b c))))
+
+(+axiom (commute-+ x y)
+  (equal (+ x y) (+ y x)))
+
+(+axiom (natp/+ x y)
+  (if (natp x)
+    (if (natp y)
+      (equal (natp (+ x y)) 't)
+      't)
+    't))
+
+(+axiom (positives-+ x y)
+  (if (< '0 x)
+    (if (< '0 y)
+      (equal (< '0 (+ x y)) 't)
+      't)
+    't))
+
+(+axiom (common-addends-< x y z)
+  (equal (< (+ x z) (+ y z)) (< x y)))
+
+(+axiom (identity-+ x)
+  (if (natp x) (equal (+ '0 x) x) 't))
+
+(+fun (list-induction x)
+  (if (atom x)
+    '()
+    (cons (car x)
+          (list-induction (cdr x)))))
+
+(+total (list-induction x)
+  (size x)
+  ((A E) (size/cdr x))
+  ((A) (if-same (atom x) 't))
+  ((Q) (natp/size x))
+  (() (if-true 't 'nil)))
+
+(+fun (star-induction x)
+  (if (atom x)
+    x
+    (cons (star-induction (car x))
+          (star-induction (cdr x)))))
+
+(+total (star-induction x)
+  (size x)
+  ((A E A) (size/cdr x))
+  ((A E Q) (size/car x))
+  ((A E) (if-true 't 'nil))
+  ((A) (if-same (atom x) 't))
+  ((Q) (natp/size x))
+  (() (if-true 't 'nil)))
