@@ -4,4 +4,4 @@
     and an ACL2 style theorem prover, with structural diff.
 
   - it is inspired by the implementation of J-Bob
-    in the little prover, by Daniel P. Friedman and Carl Eastlund.
+    in `the little prover`, by Daniel P. Friedman and Carl Eastlund.
