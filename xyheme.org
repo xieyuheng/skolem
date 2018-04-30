@@ -3,6 +3,8 @@
 
 * [todo-stack]
 
+*** (+axiom)
+
 *** read the whole imp of j-bob
 
 *** use (<=>) for rewrite instead of (equal)

@@ -207,7 +207,7 @@
       (if x 't (equal (if x y z) z)))
     #+end_src
 
-* (3. What’s in a Name?)
+* (3. What's in a Name?)
 
 *** The Law of Defun (initial)
 
@@ -349,23 +349,7 @@
 
 * (5. Think It Over, and Over, and Over)
 
-*** Insight: Rewrite from the Inside Out
-
-    - Rewrite an expression from the "inside" out,
-      starting inside if answers, if elses, and function arguments.
-
-      Simplify the arguments
-      of a function application as much as possible,
-      then use the Law of Defun
-      to replace the application with the function’s body.
-
-      Rewrite if questions as necessary
-      to use theorems that require premises.
-
-      Proceed to outer expressions
-      when inner expressions cannot be simplified.
-
-*** proofs
+*** memb?
 
     #+begin_src cicada
     (+fun (memb? xs)
@@ -389,7 +373,11 @@
       ((E E) (size/cdr xs))
       ((E) (if-same (equal (car xs) '?) 't))
       (() (if-same (atom xs) 't)))
+    #+end_src
 
+*** remb
+
+    #+begin_src cicada
     (+fun (remb xs)
       (if (atom xs)
         '()
@@ -407,7 +395,11 @@
          'nil))
       ((E) (size/cdr xs))
       (() (if-same (atom xs) 't)))
+    #+end_src
 
+*** memb?/remb0
+
+    #+begin_src cicada
     (+theorem (memb?/remb0)
       (equal (memb? (remb '())) 'nil))
 
@@ -433,7 +425,165 @@
       (() (equal-same 'nil)))
     #+end_src
 
-* >< (6. Think It Through)
+*** Insight: Rewrite from the Inside Out
+
+    - Rewrite an expression from the "inside" out,
+      starting inside if answers, if elses, and function arguments.
+
+      Simplify the arguments
+      of a function application as much as possible,
+      then use the Law of Defun
+      to replace the application with the function's body.
+
+      Rewrite if questions as necessary
+      to use theorems that require premises.
+
+      Proceed to outer expressions
+      when inner expressions cannot be simplified.
+
+*** >< memb?/remb1
+
+    #+begin_src cicada
+    (+theorem (memb?/remb1 x1)
+      (equal (memb?
+              (remb (cons x1 '())))
+             'nil))
+    #+end_src
+
+*** >< memb?/remb2
+
+*** If Lifting
+
+    - To move an if question from inside a focus to outside the
+      focus, use if-same where x is the if question and y is the
+      entire focus. This copies the focus in the answer and else
+      of the new if.
+
+      #+begin_src cicada
+      ><
+      #+end_src
+
+    - Then use if-nest-A and if-nest-E to remove each if with the
+      same question in the answer and else of the new if.
+
+      #+begin_src cicada
+      ><
+      #+end_src
+
+*** Insight: Pull Ifs Outward
+
+    - Use If Lifting when an if is found in an argument of a
+      function application or in an if question.
+
+      Lift the if outside any function applications
+      and if questions.
+
+*** Insight: Keep Theorems in Mind
+
+    - Bear existing theorems in mind, especially axioms.
+
+      When the current claim contains an expression
+      that some theorem can rewrite,
+      try using that theorem.
+
+      When the current claim contains part of an expression
+      that some theorem can rewrite,
+      leave that part alone
+      and try to rewrite the current claim
+      in order to use the theorem.
+
+* (6. Think It Through)
+
+*** memb?/remb
+
+    #+begin_src cicada
+    (+theorem (memb?/remb xs)
+      (equal (memb? (remb xs)) 'nil))
+
+    (+proof (memb?/remb xs)
+      (list-induction xs)
+      ((A 1 1) (remb xs))
+      ((A 1 1) (if-nest-A
+                (atom xs)
+                '()
+                (if (equal (car xs) '?)
+                  (remb (cdr xs))
+                  (cons (car xs) (remb (cdr xs))))))
+      ((A 1) (memb? '()))
+      ((A 1 Q) (atom '()))
+      ((A 1) (if-true
+               'nil
+               (if (equal (car '()) '?) 't (memb? (cdr '())))))
+      ((A) (equal 'nil 'nil))
+      ((E A 1 1) (remb xs))
+      ((E A 1 1) (if-nest-E
+                  (atom xs)
+                  '()
+                  (if (equal (car xs) '?)
+                    (remb (cdr xs))
+                    (cons (car xs) (remb (cdr xs))))))
+      ((E A 1)
+       (if-same (equal (car xs) '?)
+                (memb? (if (equal (car xs) '?)
+                        (remb (cdr xs))
+                        (cons (car xs) (remb (cdr xs)))))))
+      ((E A 1 A 1) (if-nest-A
+                    (equal (car xs) '?)
+                    (remb (cdr xs))
+                    (cons (car xs) (remb (cdr xs)))))
+      ((E A 1 E 1) (if-nest-E
+                    (equal (car xs) '?)
+                    (remb (cdr xs))
+                    (cons (car xs) (remb (cdr xs)))))
+      ((E A 1 A) (equal-if (memb? (remb (cdr xs))) 'nil))
+      ((E A 1 E) (memb? (cons (car xs) (remb (cdr xs)))))
+      ((E A 1 E Q) (atom/cons (car xs) (remb (cdr xs))))
+      ((E A 1 E)
+       (if-false
+        'nil
+        (if (equal (car (cons (car xs) (remb (cdr xs)))) '?)
+          't
+          (memb? (cdr (cons (car xs) (remb (cdr xs))))))))
+      ((E A 1 E Q 1) (car/cons (car xs) (remb (cdr xs))))
+      ((E A 1 E E 1) (cdr/cons (car xs) (remb (cdr xs))))
+      ((E A 1 E) (if-nest-E
+                  (equal (car xs) '?)
+                  't
+                  (memb? (remb (cdr xs)))))
+      ((E A 1 E) (equal-if
+                  (memb? (remb (cdr xs))) 'nil))
+      ((E A 1) (if-same (equal (car xs) '?) 'nil))
+      ((E A) (equal 'nil 'nil))
+      ((E) (if-same (equal (memb? (remb (cdr xs))) 'nil) 't))
+      (() (if-same (atom xs) 't)))
+    #+end_src
+
+*** Insight: Don't Touch Inductive Premises
+
+    - Do not try to simplify an inductive premise
+      in an inductive proof directly.
+
+      Instead, rewrite the expression around it
+      until the inductive premise can be applied.
+
+      Often, after applying the inductive premise,
+      an inductive proof is nearly done.
+
+*** Insight: Build Up to Induction Gradually
+
+    - Build up to a proof by induction over lists
+      by proving theorems about the empty list,
+      lists with one element,
+      lists with two elements, and so on.
+
+    - Once the pattern of these proofs is clear,
+      the proof by induction should be similar.
+
+*** Proof by List Induction
+
+    - To prove a claim C by induction over a list named x, prove
+      (if (atom x) C (if C-cdr C 't))
+      where C-cdr is C with x replaced by (cdr x).
 
 * >< (7. Oh My, Stars!)
 
@@ -526,6 +676,5 @@
                     (cons 'black '(coffee))))
            c))
       ((Q E 2) (cons 'black '(coffee)))
-      ((Q A Q) (equal-same 'nil))
-      ((Q A) (if-true a b)))
+      ((Q A Q) (equal-same 'nil)))
     #+end_src
