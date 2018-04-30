@@ -581,13 +581,107 @@
 
 *** Proof by List Induction
 
-    - To prove a claim C by induction over a list named x, prove
+    - To prove a claim C by induction over a list named x,
+      prove :
+      #+begin_src cicada
       (if (atom x) C (if C-cdr C 't))
+      #+end_src
       where C-cdr is C with x replaced by (cdr x).
 
-* >< (7. Oh My, Stars!)
+* (7. Oh My, Stars!)
 
-* >< (8. Learning the Rules)
+*** ctx?
+
+    #+begin_src cicada
+    (+fun (ctx? x)
+      (if (atom x)
+        (equal x '?)
+        (if (ctx? (car x))
+          't
+          (ctx? (cdr x)))))
+
+    (+total (ctx? x)
+      (size x)
+      ((Q) (natp/size x))
+      (() (if-true
+            (if (atom x)
+              't
+              (if (< (size (car x)) (size x))
+                (if (ctx? (car x)) 't (< (size (cdr x)) (size x)))
+                'nil))
+            'nil))
+      ((E Q) (size/car x))
+      ((E) (if-true
+             (if (ctx? (car x)) 't (< (size (cdr x)) (size x)))
+             'nil))
+      ((E E) (size/cdr x))
+      ((E) (if-same (ctx? (car x)) 't))
+      (() (if-same (atom x) 't)))
+    #+end_src
+
+*** Proof by Star Induction
+
+    - To prove a claim C by induction over cars and cdrs
+      of a variable named x,
+      prove :
+      #+begin_src cicada
+      (if (atom x) C (if C-car (if C-cdr C 't) 't))
+      #+end_src
+      where C-car is C with x replaced by (car x)
+      and C-cdr is C with x replaced by (cdr x).
+
+*** Insight: Combine Ifs
+
+    - When there are multiple ifs with the same question,
+      combine them into one if with If Lifting.
+
+    - Lift the ifs outside any function applications
+      and if questions.
+
+*** Insight: Create Helpers for Induction
+
+    - To rewrite the application of a recursive function,
+      prove a separate theorem about the recursive function
+      using induction.
+
+      Do this if the current proof either
+
+      1. does not use induction,
+         or uses induction for
+
+      2. a different kind of recursion from the function,
+         or uses induction on
+
+      3. different arguments from the application.
+
+*** >< ctx?/t
+
+    #+begin_src cicada
+
+    #+end_src
+
+*** >< ctx?/sub
+
+    #+begin_src cicada
+    (+theorem (ctx?/sub x y)
+      (if (ctx? x)
+        (if (ctx? y)
+          (equal (ctx? (sub x y)) 't)
+          't)
+        't))
+
+    (+proof (ctx?/sub x y)
+      (star-induction y)
+      )
+    #+end_src
+
+* (8. Learning the Rules)
+
+*** ><
+
+    #+begin_src cicada
+
+    #+end_src
 
 * >< (9. Changing the Rules)
 

@@ -1357,86 +1357,104 @@
 
 *** axioms
 
-    #+begin_src scheme
-    (+axiom (atom/cons x y)
-      (equal (atom (cons x y)) 'nil))
+***** The Axioms of Cons
 
-    (+axiom (car/cons x y)
-      (equal (car (cons x y)) x))
+      #+begin_src scheme
+      (+axiom (atom/cons x y)
+        (equal (atom (cons x y)) 'nil))
 
-    (+axiom (cdr/cons x y)
-      (equal (cdr (cons x y)) y))
+      (+axiom (car/cons x y)
+        (equal (car (cons x y)) x))
 
-    (+axiom (equal-same x)
-      (equal (equal x x) 't))
+      (+axiom (cdr/cons x y)
+        (equal (cdr (cons x y)) y))
 
-    (+axiom (equal-swap x y)
-      (equal (equal x y) (equal y x)))
+      (+axiom (cons/car+cdr x)
+        (if (atom x)
+          't
+          (equal (cons (car x) (cdr x)) x)))
+      #+end_src
 
-    (+axiom (if-same x y)
-      (equal (if x y y) y))
+***** The Axioms of Equal
 
-    (+axiom (if-true x y)
-      (equal (if 't x y) x))
+      #+begin_src scheme
+      (+axiom (equal-same x)
+        (equal (equal x x) 't))
 
-    (+axiom (if-false x y)
-      (equal (if 'nil x y) y))
+      (+axiom (equal-swap x y)
+        (equal (equal x y) (equal y x)))
 
-    (+axiom (if-nest-E x y z)
-      (if x 't (equal (if x y z) z)))
+      (+axiom (equal-if x y)
+        (if (equal x y) (equal x y) 't))
+      #+end_src
 
-    (+axiom (if-nest-A x y z)
-      (if x (equal (if x y z) y) 't))
+***** The Axioms of If
 
-    (+axiom (cons/car+cdr x)
-      (if (atom x)
-        't
-        (equal (cons (car x) (cdr x)) x)))
+      #+begin_src scheme
+      (+axiom (if-same x y)
+        (equal (if x y y) y))
 
-    (+axiom (equal-if x y)
-      (if (equal x y) (equal x y) 't))
+      (+axiom (if-true x y)
+        (equal (if 't x y) x))
 
-    (+axiom (natp/size x)
-      (equal (natp (size x)) 't))
+      (+axiom (if-false x y)
+        (equal (if 'nil x y) y))
 
-    (+axiom (size/car x)
-      (if (atom x)
-        't
-        (equal (< (size (car x)) (size x)) 't)))
+      (+axiom (if-nest-E x y z)
+        (if x 't (equal (if x y z) z)))
 
-    (+axiom (size/cdr x)
-      (if (atom x)
-        't
-        (equal (< (size (cdr x)) (size x)) 't)))
+      (+axiom (if-nest-A x y z)
+        (if x (equal (if x y z) y) 't))
+      #+end_src
 
-    (+axiom (associate-+ a b c)
-      (equal (+ (+ a b) c) (+ a (+ b c))))
+***** The Axioms of Size
 
-    (+axiom (commute-+ x y)
-      (equal (+ x y) (+ y x)))
+      #+begin_src scheme
+      (+axiom (natp/size x)
+        (equal (natp (size x)) 't))
 
-    (+axiom (natp/+ x y)
-      (if (natp x)
-        (if (natp y)
-          (equal (natp (+ x y)) 't)
-          't)
-        't))
+      (+axiom (size/car x)
+        (if (atom x)
+          't
+          (equal (< (size (car x)) (size x)) 't)))
 
-    (+axiom (positives-+ x y)
-      (if (< '0 x)
-        (if (< '0 y)
-          (equal (< '0 (+ x y)) 't)
-          't)
-        't))
+      (+axiom (size/cdr x)
+        (if (atom x)
+          't
+          (equal (< (size (cdr x)) (size x)) 't)))
+      #+end_src
 
-    (+axiom (common-addends-< x y z)
-      (equal (< (+ x z) (+ y z)) (< x y)))
+***** ><
 
-    (+axiom (identity-+ x)
-      (if (natp x) (equal (+ '0 x) x) 't))
-    #+end_src
+      #+begin_src scheme
+      (+axiom (associate-+ a b c)
+        (equal (+ (+ a b) c) (+ a (+ b c))))
 
-*** prelude
+      (+axiom (commute-+ x y)
+        (equal (+ x y) (+ y x)))
+
+      (+axiom (natp/+ x y)
+        (if (natp x)
+          (if (natp y)
+            (equal (natp (+ x y)) 't)
+            't)
+          't))
+
+      (+axiom (positives-+ x y)
+        (if (< '0 x)
+          (if (< '0 y)
+            (equal (< '0 (+ x y)) 't)
+            't)
+          't))
+
+      (+axiom (common-addends-< x y z)
+        (equal (< (+ x z) (+ y z)) (< x y)))
+
+      (+axiom (identity-+ x)
+        (if (natp x) (equal (+ '0 x) x) 't))
+      #+end_src
+
+*** list-induction
 
     #+begin_src scheme
     (+fun (list-induction x)
@@ -1451,7 +1469,11 @@
       ((A) (if-same (atom x) 't))
       ((Q) (natp/size x))
       (() (if-true 't 'nil)))
+    #+end_src
 
+*** star-induction
+
+    #+begin_src scheme
     (+fun (star-induction x)
       (if (atom x)
         x
