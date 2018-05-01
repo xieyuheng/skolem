@@ -33,71 +33,71 @@
 *** (define-macro)
 
     #+begin_src scheme
-    ;; code taken from a example in chez repo :: ChezScheme/examples/compat.ss
+    ;; code taken from a example in chez repo
+    ;;   :: ChezScheme/examples/compat.ss
 
-    ;;; thanks to Michael Lenaghan (MichaelL@frogware.com) for suggesting
-    ;;; various improvements.
+    ;;; thanks to Michael Lenaghan (MichaelL@frogware.com)
+    ;;; for suggesting various improvements.
 
-    (define-syntax define-macro
-      (lambda (x)
-        (syntax-case x ()
-          [(k (name arg1 ... . args)
+    (define-syntax (define-macro x)
+      (syntax-case x ()
+        [(k (name arg1 ... . args)
+            form1
+            form2
+            ...)
+         #'(k name (arg1 ... . args)
               form1
               form2
-              ...)
-           #'(k name (arg1 ... . args)
-                form1
-                form2
-                ...)]
-          [(k (name arg1 arg2 ...)
+              ...)]
+        [(k (name arg1 arg2 ...)
+            form1
+            form2
+            ...)
+         #'(k name (arg1 arg2 ...)
               form1
               form2
-              ...)
-           #'(k name (arg1 arg2 ...)
-                form1
-                form2
-                ...)]
-          [(k name args . forms)
-           (identifier? #'name)
-           (letrec ((add-car
-                     (lambda (access)
-                       (case (car access)
-                         ((cdr) `(cadr ,@(cdr access)))
-                         ((cadr) `(caadr ,@(cdr access)))
-                         ((cddr) `(caddr ,@(cdr access)))
-                         ((cdddr) `(cadddr ,@(cdr access)))
-                         (else `(car ,access)))))
-                    (add-cdr
-                     (lambda (access)
-                       (case (car access)
-                         ((cdr) `(cddr ,@(cdr access)))
-                         ((cadr) `(cdadr ,@(cdr access)))
-                         ((cddr) `(cdddr ,@(cdr access)))
-                         ((cdddr) `(cddddr ,@(cdr access)))
-                         (else `(cdr ,access)))))
-                    (parse
-                     (lambda (l access)
-                       (cond
-                        ((null? l) '())
-                        ((symbol? l) `((,l ,access)))
-                        ((pair? l)
-                         (append!
-                           (parse (car l) (add-car access))
-                           (parse (cdr l) (add-cdr access))))
-                        (else
-                         (syntax-error #'args
-                                       (format "invalid ~s parameter syntax" (datum k))))))))
-             (with-syntax ((proc (datum->syntax-object #'k
-                                                       (let ((g (gensym)))
-                                                         `(lambda (,g)
-                                                            (let ,(parse (datum args) `(cdr ,g))
-                                                              ,@(datum forms)))))))
-               #'(define-syntax name
-                   (lambda (x)
-                     (syntax-case x ()
-                       ((k1 . r)
-                        (datum->syntax-object #'k1
-                                              (proc (syntax-object->datum x)))))))))])))
+              ...)]
+        [(k name args . forms)
+         (identifier? #'name)
+         (letrec ((add-car
+                   (lambda (access)
+                     (case (car access)
+                       ((cdr) `(cadr ,@(cdr access)))
+                       ((cadr) `(caadr ,@(cdr access)))
+                       ((cddr) `(caddr ,@(cdr access)))
+                       ((cdddr) `(cadddr ,@(cdr access)))
+                       (else `(car ,access)))))
+                  (add-cdr
+                   (lambda (access)
+                     (case (car access)
+                       ((cdr) `(cddr ,@(cdr access)))
+                       ((cadr) `(cdadr ,@(cdr access)))
+                       ((cddr) `(cdddr ,@(cdr access)))
+                       ((cdddr) `(cddddr ,@(cdr access)))
+                       (else `(cdr ,access)))))
+                  (parse
+                   (lambda (l access)
+                     (cond
+                      ((null? l) '())
+                      ((symbol? l) `((,l ,access)))
+                      ((pair? l)
+                       (append!
+                         (parse (car l) (add-car access))
+                         (parse (cdr l) (add-cdr access))))
+                      (else
+                       (syntax-error #'args
+                                     (format "invalid ~s parameter syntax" (datum k))))))))
+           (with-syntax ((proc (datum->syntax-object #'k
+                                                     (let ((g (gensym)))
+                                                       `(lambda (,g)
+                                                          (let ,(parse (datum args) `(cdr ,g))
+                                                            ,@(datum forms)))))))
+             #'(define-syntax name
+                 (lambda (x)
+                   (syntax-case x ()
+                     ((k1 . r)
+                      (datum->syntax-object #'k1
+                                            (proc (syntax-object->datum x)))))))))]))
     #+end_src
 
 *** (cat) & (orz)
@@ -309,6 +309,14 @@
     (define (if.Q e) (elem1 (untag e)))
     (define (if.A e) (elem2 (untag e)))
     (define (if.E e) (elem3 (untag e)))
+
+    (define (if-QAE e)
+      (list3 (if.Q e) (if.A e) (if.E e)))
+    (define (QAE-if es)
+      (if-c (elem1 es) (elem2 es) (elem3 es)))
+
+    (define (if-c-when-necessary Q A E)
+      (if (equal A E) A (if-c Q A E)))
     #+end_src
 
 *** app
@@ -364,75 +372,75 @@
     (define (dethm.body def) (elem3 (untag def)))
     #+end_src
 
-* about (if) and nine operators
+*** def
 
-  #+begin_src scheme
-  (define (if-QAE e)
-    (list3 (if.Q e) (if.A e) (if.E e)))
-  (define (QAE-if es)
-    (if-c (elem1 es) (elem2 es) (elem3 es)))
+    #+begin_src scheme
+    (note
+      defun and dethm have the same shape)
 
-  (define (member? x ys)
-    (if (atom ys)
-      'nil
-      (if (equal x (car ys))
-        't
-        (member? x (cdr ys)))))
-
-  (define (rator? name)
-    (member? name
-      '(equal atom car cdr cons natp size + <)))
-
-  (define (rator.formals rator)
-    (if (member? rator '(atom car cdr natp size))
-      '(x)
-      (if (member? rator '(equal cons + <))
-        '(x y)
-        'nil)))
-  #+end_src
-
-* defun and dethm have the same shape
-
-  #+begin_src scheme
-  (define (def.name def)
-    (if (defun? def)
-      (defun.name def)
-      (if (dethm? def)
-        (dethm.name def)
-        def)))
-
-  (define (def.formals def)
-    (if (dethm? def)
-      (dethm.formals def)
+    (define (def.name def)
       (if (defun? def)
-        (defun.formals def)
-        '())))
-  #+end_src
+        (defun.name def)
+        (if (dethm? def)
+          (dethm.name def)
+          def)))
 
-* about (if)
+    (define (def.formals def)
+      (if (dethm? def)
+        (dethm.formals def)
+        (if (defun? def)
+          (defun.formals def)
+          '())))
+    #+end_src
 
-  #+begin_src scheme
-  (define (if-c-when-necessary Q A E)
-    (if (equal A E) A (if-c Q A E)))
+*** operator
 
-  (define (conjunction es)
-    (if (atom es)
-      (quote-c 't)
-      (if (atom (cdr es))
-        (car es)
+    #+begin_src scheme
+    (note
+      The rator? function
+      recognizes operators and rator.formals
+      produces the formal argument list of each.)
+
+    (define (member? x ys)
+      (if (atom ys)
+        'nil
+        (if (equal x (car ys))
+          't
+          (member? x (cdr ys)))))
+
+    (define (rator? name)
+      (member? name
+        '(equal atom car cdr cons natp size + <)))
+
+    (define (rator.formals rator)
+      (if (member? rator '(atom car cdr natp size))
+        '(x)
+        (if (member? rator '(equal cons + <))
+          '(x y)
+          'nil)))
+    #+end_src
+
+*** conjunction & implication
+
+    #+begin_src scheme
+    (define (conjunction es)
+      (if (atom es)
+        (quote-c 't)
+        (if (atom (cdr es))
+          (car es)
+          (if-c (car es)
+            (conjunction (cdr es))
+            (quote-c 'nil)))))
+
+    (define (implication es e)
+      (if (atom es)
+        e
         (if-c (car es)
-          (conjunction (cdr es))
-          (quote-c 'nil)))))
+          (implication (cdr es) e)
+          (quote-c 't))))
+    #+end_src
 
-  (define (implication es e)
-    (if (atom es)
-      e
-      (if-c (car es)
-        (implication (cdr es) e)
-        (quote-c 't))))
-  #+end_src
-
-* about association list
+* assoc
 
   #+begin_src scheme
   (define (lookup name defs)
@@ -532,48 +540,62 @@
 
 * about argument list
 
-  #+begin_src scheme
-  (define (get-arg-from n args from)
-    (if (atom args)
-      'nil
-      (if (equal n from)
-        (car args)
-        (get-arg-from n (cdr args) (+ from '1)))))
+*** get-arg
 
-  (define (get-arg n args)
-    (get-arg-from n args '1))
+    #+begin_src scheme
+    (define (get-arg-from n args from)
+      (if (atom args)
+        'nil
+        (if (equal n from)
+          (car args)
+          (get-arg-from n (cdr args) (+ from '1)))))
 
-  (define (set-arg-from n args y from)
-    (if (atom args)
-      '()
-      (if (equal n from)
-        (cons y (cdr args))
-        (cons (car args)
-          (set-arg-from n (cdr args) y
-            (+ from '1))))))
+    (define (get-arg n args)
+      (get-arg-from n args '1))
+    #+end_src
 
-  (define (set-arg n args y)
-    (set-arg-from n args y '1))
+*** set-arg
 
-  (define (<=len-from n args from)
-    (if (atom args)
-      'nil
-      (if (equal n from)
+    #+begin_src scheme
+    (define (set-arg-from n args y from)
+      (if (atom args)
+        '()
+        (if (equal n from)
+          (cons y (cdr args))
+          (cons (car args)
+            (set-arg-from n (cdr args) y
+              (+ from '1))))))
+
+    (define (set-arg n args y)
+      (set-arg-from n args y '1))
+    #+end_src
+
+*** <=len
+
+    #+begin_src scheme
+    (define (<=len-from n args from)
+      (if (atom args)
+        'nil
+        (if (equal n from)
+          't
+          (<=len-from n (cdr args) (+ from '1)))))
+
+    (define (<=len n args)
+      (if (< '0 n) (<=len-from n args '1) 'nil))
+    #+end_src
+
+*** formals?
+
+    #+begin_src scheme
+    (define (formals? vars)
+      (if (atom vars)
         't
-        (<=len-from n (cdr args) (+ from '1)))))
-
-  (define (<=len n args)
-    (if (< '0 n) (<=len-from n args '1) 'nil))
-
-  (define (formals? vars)
-    (if (atom vars)
-      't
-      (if (var? (car vars))
-        (if (member? (car vars) (cdr vars))
-          'nil
-          (formals? (cdr vars)))
-        'nil)))
-  #+end_src
+        (if (var? (car vars))
+          (if (member? (car vars) (cdr vars))
+            'nil
+            (formals? (cdr vars)))
+          'nil)))
+    #+end_src
 
 * the path to a focus
 
