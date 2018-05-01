@@ -578,6 +578,7 @@
               (sub-es vars args
                 (app.args (car es))))
             (sub-es vars args (cdr es))))))))
+
 (defun sub-e (vars args e)
   (elem1 (sub-es vars args (list1 e))))
 
@@ -603,6 +604,7 @@
               (exprs-recs f (app.args (car es)))
               (exprs-recs f
                 (cdr es)))))))))
+
 (defun expr-recs (f e)
   (exprs-recs f (list1 e)))
 
@@ -857,11 +859,11 @@
             (dethm.body def)))
         claim))))
 
-(defun rewrite/step (defs claim step)
+(define (rewrite/step defs claim step)
   (equality/def claim (elem1 step) (elem2 step)
     (lookup (app.name (elem2 step)) defs)))
 
-(defun rewrite/continue (defs steps old new)
+(define (rewrite/continue defs steps old new)
   (if (equal new old)
     new
     (if (atom steps)
@@ -869,13 +871,13 @@
       (rewrite/continue defs (cdr steps) new
         (rewrite/step defs new (car steps))))))
 
-(defun rewrite/steps (defs claim steps)
+(define (rewrite/steps defs claim steps)
   (if (atom steps)
     claim
     (rewrite/continue defs (cdr steps) claim
       (rewrite/step defs claim (car steps)))))
 
-(defun rewrite/prove (defs def seed steps)
+(define (rewrite/prove defs def seed steps)
   (if (defun? def)
     (rewrite/steps defs
       (totality/claim seed def)
@@ -886,13 +888,13 @@
         steps)
       (quote-c 'nil))))
 
-(defun rewrite/prove+1 (defs pf e)
+(define (rewrite/prove+1 defs pf e)
   (if (equal e (quote-c 't))
     (rewrite/prove defs (elem1 pf) (elem2 pf)
       (cdr (cdr pf)))
     e))
 
-(defun rewrite/prove+ (defs pfs)
+(define (rewrite/prove+ defs pfs)
   (if (atom pfs)
     (quote-c 't)
     (rewrite/prove+1 defs (car pfs)
@@ -900,13 +902,13 @@
         (list-extend defs (elem1 (car pfs)))
         (cdr pfs)))))
 
-(defun rewrite/define (defs def seed steps)
+(define (rewrite/define defs def seed steps)
   (if (equal (rewrite/prove defs def seed steps)
              (quote-c 't))
     (list-extend defs def)
     defs))
 
-(defun rewrite/define+1 (defs1 defs2 pfs)
+(define (rewrite/define+1 defs1 defs2 pfs)
   (if (equal defs1 defs2)
     defs1
     (if (atom pfs)
@@ -918,7 +920,7 @@
           (cdr (cdr (car pfs))))
         (cdr pfs)))))
 
-(defun rewrite/define+ (defs pfs)
+(define (rewrite/define+ defs pfs)
   (if (atom pfs)
     defs
     (rewrite/define+1 defs
@@ -927,15 +929,6 @@
         (elem2 (car pfs))
         (cdr (cdr (car pfs))))
       (cdr pfs))))
-
-(define (J-Bob/step defs e steps)
-  (if (defs? '() defs)
-    (if (expr? defs 'any e)
-      (if (steps? defs steps)
-        (rewrite/steps defs e steps)
-        e)
-      e)
-    e))
 
 (define (J-Bob/prove defs pfs)
   (if (defs? '() defs)
@@ -1049,10 +1042,10 @@
   (syntax-rules ()
     ((_ (name arg ...) body)
      (begin
-       (+def/help (quote (defun name (arg ...) body)))
-       (total/help (quote (defun name (arg ...) body)))))))
+       (+def-fn (quote (defun name (arg ...) body)))
+       (total-fn (quote (defun name (arg ...) body)))))))
 
-(define (total/help def)
+(define (total-fn def)
   (let* ([pfs (list (list def 'nil))]
          [total-p (J-Bob/prove *theorem-list* pfs)])
     (when (equal total-p 't)
@@ -1062,9 +1055,9 @@
 (define-syntax +theorem
   (syntax-rules ()
     ((_ (name arg ...) body)
-     (+def/help (quote (dethm name (arg ...) body))))))
+     (+def-fn (quote (dethm name (arg ...) body))))))
 
-(define (+def/help def)
+(define (+def-fn def)
   (if (find-def (def.name def) *claim-list*)
     (cat (newline)
          ("- can not redefine : ~a~%" (def.name def))
@@ -1076,10 +1069,10 @@
 (define-syntax +proof
   (syntax-rules ()
     ((_ (name arg ...) exp ...)
-     (+proof/help (quote name)
+     (+proof-fn (quote name)
                   (quote (exp ...))))))
 
-(define (+proof/help name rest)
+(define (+proof-fn name rest)
   (if (find-def name *theorem-list*)
     (cat (newline)
          ("- theorem `~a` has already been proved ~%" name))
@@ -1098,26 +1091,35 @@
 (define-syntax +total
   (syntax-rules ()
     ((_ (name arg ...) exp ...)
-     (+total/help (quote name)
+     (+total-fn (quote name)
                   (quote (exp ...))))))
 
-(define +total/help +proof/help)
+(define +total-fn +proof-fn)
 
 (define-syntax step
   (syntax-rules ()
     ((_ exp s ...)
-     (J-Bob/step *theorem-list*
+     (step-fn *theorem-list*
        (quote exp)
        (quote (s ...))))))
+
+(define (step-fn defs e steps)
+  (if (defs? '() defs)
+    (if (expr? defs 'any e)
+      (if (steps? defs steps)
+        (rewrite/steps defs e steps)
+        e)
+      e)
+    e))
 
 (define *axiom-list* '())
 
 (define-syntax +axiom
   (syntax-rules ()
     ((_ (name arg ...) body)
-     (+axiom/help (quote (dethm name (arg ...) body))))))
+     (+axiom-fn (quote (dethm name (arg ...) body))))))
 
-(define (+axiom/help def)
+(define (+axiom-fn def)
   (set! *axiom-list* (append *axiom-list* (list def)))
   (set! *claim-list* (append *claim-list* (list def)))
   (set! *theorem-list* (append *theorem-list* (list def))))

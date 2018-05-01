@@ -286,59 +286,81 @@
   (defun untag (x) (cdr x))
   #+end_src
 
-* expressions
+* exp
 
-  #+begin_src scheme
-  (defun quote-c (value)
-    (tag 'quote (list1 value)))
-  (defun quote? (x)
-    (if (tag? 'quote x) (list1? (untag x)) 'nil))
-  (defun quote.value (e) (elem1 (untag e)))
+*** quote
 
-  (defun if-c (Q A E) (tag 'if (list3 Q A E)))
-  (defun if? (x)
-    (if (tag? 'if x) (list3? (untag x)) 'nil))
-  (defun if.Q (e) (elem1 (untag e)))
-  (defun if.A (e) (elem2 (untag e)))
-  (defun if.E (e) (elem3 (untag e)))
+    #+begin_src scheme
+    (defun quote-c (value)
+      (tag 'quote (list1 value)))
+    (defun quote? (x)
+      (if (tag? 'quote x) (list1? (untag x)) 'nil))
+    (defun quote.value (e) (elem1 (untag e)))
+    #+end_src
 
-  (defun app-c (name args) (cons name args))
-  (defun app? (x)
-    (if (atom x)
-      'nil
-      (if (quote? x)
+*** if
+
+    #+begin_src scheme
+    (defun if-c (Q A E) (tag 'if (list3 Q A E)))
+    (defun if? (x)
+      (if (tag? 'if x) (list3? (untag x)) 'nil))
+    (defun if.Q (e) (elem1 (untag e)))
+    (defun if.A (e) (elem2 (untag e)))
+    (defun if.E (e) (elem3 (untag e)))
+    #+end_src
+
+*** app
+
+    #+begin_src scheme
+    (defun app-c (name args) (cons name args))
+    (defun app? (x)
+      (if (atom x)
         'nil
-        (if (if? x)
+        (if (quote? x)
           'nil
-          't))))
-  (defun app.name (e) (car e))
-  (defun app.args (e) (cdr e))
+          (if (if? x)
+            'nil
+            't))))
+    (defun app.name (e) (car e))
+    (defun app.args (e) (cdr e))
+    #+end_src
 
-  (defun var? (x)
-    (if (equal x 't)
-      'nil
-      (if (equal x 'nil)
+*** var
+
+    #+begin_src scheme
+    (defun var? (x)
+      (if (equal x 't)
         'nil
-        (if (natp x)
+        (if (equal x 'nil)
           'nil
-          (atom x)))))
+          (if (natp x)
+            'nil
+            (atom x)))))
+    #+end_src
 
-  (defun defun-c (name formals body)
-    (tag 'defun (list3 name formals body)))
-  (defun defun? (x)
-    (if (tag? 'defun x) (list3? (untag x)) 'nil))
-  (defun defun.name (def) (elem1 (untag def)))
-  (defun defun.formals (def) (elem2 (untag def)))
-  (defun defun.body (def) (elem3 (untag def)))
+*** defun
 
-  (defun dethm-c (name formals body)
-    (tag 'dethm (list3 name formals body)))
-  (defun dethm? (x)
-    (if (tag? 'dethm x) (list3? (untag x)) 'nil))
-  (defun dethm.name (def) (elem1 (untag def)))
-  (defun dethm.formals (def) (elem2 (untag def)))
-  (defun dethm.body (def) (elem3 (untag def)))
-  #+end_src
+    #+begin_src scheme
+    (defun defun-c (name formals body)
+      (tag 'defun (list3 name formals body)))
+    (defun defun? (x)
+      (if (tag? 'defun x) (list3? (untag x)) 'nil))
+    (defun defun.name (def) (elem1 (untag def)))
+    (defun defun.formals (def) (elem2 (untag def)))
+    (defun defun.body (def) (elem3 (untag def)))
+    #+end_src
+
+*** dethm
+
+    #+begin_src scheme
+    (defun dethm-c (name formals body)
+      (tag 'dethm (list3 name formals body)))
+    (defun dethm? (x)
+      (if (tag? 'dethm x) (list3? (untag x)) 'nil))
+    (defun dethm.name (def) (elem1 (untag def)))
+    (defun dethm.formals (def) (elem2 (untag def)))
+    (defun dethm.body (def) (elem3 (untag def)))
+    #+end_src
 
 * about (if) and nine operators
 
@@ -578,7 +600,7 @@
         'nil)))
   #+end_src
 
-* ><
+* predicate
 
   #+begin_src scheme
   (defun step-args? (defs def args)
@@ -709,7 +731,11 @@
           (list-extend defs (elem1 (car pfs)))
           (cdr pfs))
         'nil)))
+  #+end_src
 
+* sub
+
+  #+begin_src scheme
   (defun sub-var (vars args var)
     (if (atom vars)
       var
@@ -737,9 +763,14 @@
                 (sub-es vars args
                   (app.args (car es))))
               (sub-es vars args (cdr es))))))))
+
   (defun sub-e (vars args e)
     (elem1 (sub-es vars args (list1 e))))
+  #+end_src
 
+* expr
+
+  #+begin_src scheme
   (defun exprs-recs (f es)
     (if (atom es)
       '()
@@ -762,9 +793,14 @@
                 (exprs-recs f (app.args (car es)))
                 (exprs-recs f
                   (cdr es)))))))))
+
   (defun expr-recs (f e)
     (exprs-recs f (list1 e)))
+  #+end_src
 
+* totality
+
+  #+begin_src scheme
   (defun totality/< (meas formals app)
     (app-c '<
       (list2 (sub-e formals (app.args app) meas)
@@ -805,7 +841,11 @@
           (defun.formals def)
           (defun.body def))
         (quote-c 'nil))))
+  #+end_src
 
+* induction
+
+  #+begin_src scheme
   (defun induction/prems (vars claim apps)
     (if (atom apps)
       '()
@@ -837,7 +877,11 @@
       (induction/defun (app.args seed)
         (dethm.body def)
         (lookup (app.name seed) defs))))
+  #+end_src
 
+* focus
+
+  #+begin_src scheme
   (defun find-focus-at-direction (dir e)
     (if (equal dir 'Q)
       (if.Q e)
@@ -889,7 +933,11 @@
         (rewrite-focus-at-path (cdr path)
           (find-focus-at-direction (car path) e1)
           e2))))
+  #+end_src
 
+* prem
+
+  #+begin_src scheme
   (defun prem-A? (prem path e)
     (if (atom path)
       'nil
@@ -924,7 +972,11 @@
           (follow-prems path e (if.E thm))
           thm))
       thm))
+  #+end_src
 
+* op
+
+  #+begin_src scheme
   (defun unary-op (rator rand)
     (if (equal rator 'atom)
       (atom rand)
@@ -973,7 +1025,11 @@
     (if (app? e)
       (equal (app.name e) 'equal)
       'nil))
+  #+end_src
 
+* equality
+
+  #+begin_src scheme
   (defun equality (focus a b)
     (if (equal focus a)
       b
@@ -1015,93 +1071,94 @@
               (app.args app)
               (dethm.body def)))
           claim))))
+  #+end_src
 
-  (defun rewrite/step (defs claim step)
-    (equality/def claim (elem1 step) (elem2 step)
-      (lookup (app.name (elem2 step)) defs)))
+* rewrite
 
-  (defun rewrite/continue (defs steps old new)
-    (if (equal new old)
-      new
-      (if (atom steps)
+*** rewrite/step
+
+    #+begin_src scheme
+    (define (rewrite/step defs claim step)
+      (equality/def claim (elem1 step) (elem2 step)
+        (lookup (app.name (elem2 step)) defs)))
+
+    (define (rewrite/continue defs steps old new)
+      (if (equal new old)
         new
-        (rewrite/continue defs (cdr steps) new
-          (rewrite/step defs new (car steps))))))
+        (if (atom steps)
+          new
+          (rewrite/continue defs (cdr steps) new
+            (rewrite/step defs new (car steps))))))
 
-  (defun rewrite/steps (defs claim steps)
-    (if (atom steps)
-      claim
-      (rewrite/continue defs (cdr steps) claim
-        (rewrite/step defs claim (car steps)))))
+    (define (rewrite/steps defs claim steps)
+      (if (atom steps)
+        claim
+        (rewrite/continue defs (cdr steps) claim
+          (rewrite/step defs claim (car steps)))))
+    #+end_src
 
-  (defun rewrite/prove (defs def seed steps)
-    (if (defun? def)
-      (rewrite/steps defs
-        (totality/claim seed def)
-        steps)
-      (if (dethm? def)
+*** rewrite/prove
+
+    #+begin_src scheme
+    (define (rewrite/prove defs def seed steps)
+      (if (defun? def)
         (rewrite/steps defs
-          (induction/claim defs seed def)
+          (totality/claim seed def)
           steps)
-        (quote-c 'nil))))
+        (if (dethm? def)
+          (rewrite/steps defs
+            (induction/claim defs seed def)
+            steps)
+          (quote-c 'nil))))
 
-  (defun rewrite/prove+1 (defs pf e)
-    (if (equal e (quote-c 't))
-      (rewrite/prove defs (elem1 pf) (elem2 pf)
-        (cdr (cdr pf)))
-      e))
+    (define (rewrite/prove+1 defs pf e)
+      (if (equal e (quote-c 't))
+        (rewrite/prove defs (elem1 pf) (elem2 pf)
+          (cdr (cdr pf)))
+        e))
 
-  (defun rewrite/prove+ (defs pfs)
-    (if (atom pfs)
-      (quote-c 't)
-      (rewrite/prove+1 defs (car pfs)
-        (rewrite/prove+
-          (list-extend defs (elem1 (car pfs)))
-          (cdr pfs)))))
-
-  (defun rewrite/define (defs def seed steps)
-    (if (equal (rewrite/prove defs def seed steps)
-               (quote-c 't))
-      (list-extend defs def)
-      defs))
-
-  (defun rewrite/define+1 (defs1 defs2 pfs)
-    (if (equal defs1 defs2)
-      defs1
+    (define (rewrite/prove+ defs pfs)
       (if (atom pfs)
-        defs2
-        (rewrite/define+1 defs2
-          (rewrite/define defs2
+        (quote-c 't)
+        (rewrite/prove+1 defs (car pfs)
+          (rewrite/prove+
+            (list-extend defs (elem1 (car pfs)))
+            (cdr pfs)))))
+    #+end_src
+
+*** rewrite/define
+
+    #+begin_src scheme
+    (define (rewrite/define defs def seed steps)
+      (if (equal (rewrite/prove defs def seed steps)
+                 (quote-c 't))
+        (list-extend defs def)
+        defs))
+
+    (define (rewrite/define+1 defs1 defs2 pfs)
+      (if (equal defs1 defs2)
+        defs1
+        (if (atom pfs)
+          defs2
+          (rewrite/define+1 defs2
+            (rewrite/define defs2
+              (elem1 (car pfs))
+              (elem2 (car pfs))
+              (cdr (cdr (car pfs))))
+            (cdr pfs)))))
+
+    (define (rewrite/define+ defs pfs)
+      (if (atom pfs)
+        defs
+        (rewrite/define+1 defs
+          (rewrite/define defs
             (elem1 (car pfs))
             (elem2 (car pfs))
             (cdr (cdr (car pfs))))
-          (cdr pfs)))))
-
-  (defun rewrite/define+ (defs pfs)
-    (if (atom pfs)
-      defs
-      (rewrite/define+1 defs
-        (rewrite/define defs
-          (elem1 (car pfs))
-          (elem2 (car pfs))
-          (cdr (cdr (car pfs))))
-        (cdr pfs))))
-  #+end_src
+          (cdr pfs))))
+    #+end_src
 
 * J-Bob interface functions
-
-*** J-Bob/step
-
-    #+begin_src scheme
-    (define (J-Bob/step defs e steps)
-      (if (defs? '() defs)
-        (if (expr? defs 'any e)
-          (if (steps? defs steps)
-            (rewrite/steps defs e steps)
-            e)
-          e)
-        e))
-    #+end_src
 
 *** J-Bob/prove
 
@@ -1221,7 +1278,6 @@
 *** *theorem-list*
 
     #+begin_src scheme
-    ;; (define *theorem-list* (prelude))
     (define *theorem-list* '())
     #+end_src
 
@@ -1229,6 +1285,12 @@
 
     #+begin_src scheme
     (define *claim-list* *theorem-list*)
+    #+end_src
+
+*** *axiom-list*
+
+    #+begin_src scheme
+    (define *axiom-list* '())
     #+end_src
 
 *** find-def
@@ -1248,34 +1310,17 @@
       (syntax-rules ()
         ((_ (name arg ...) body)
          (begin
-           (+def/help (quote (defun name (arg ...) body)))
-           (total/help (quote (defun name (arg ...) body)))))))
-    #+end_src
+           (+def-fn (quote (defun name (arg ...) body)))
+           (total-fn (quote (defun name (arg ...) body)))))))
 
-*** total/help
-
-    #+begin_src scheme
-    (define (total/help def)
+    (define (total-fn def)
       (let* ([pfs (list (list def 'nil))]
              [total-p (J-Bob/prove *theorem-list* pfs)])
         (when (equal total-p 't)
           (set! *theorem-list*
                 (J-Bob/define *theorem-list* pfs)))))
-    #+end_src
 
-*** (+theorem)
-
-    #+begin_src scheme
-    (define-syntax +theorem
-      (syntax-rules ()
-        ((_ (name arg ...) body)
-         (+def/help (quote (dethm name (arg ...) body))))))
-    #+end_src
-
-*** +def/help
-
-    #+begin_src scheme
-    (define (+def/help def)
+    (define (+def-fn def)
       (if (find-def (def.name def) *claim-list*)
         (cat (newline)
              ("- can not redefine : ~a~%" (def.name def))
@@ -1285,20 +1330,25 @@
         (set! *claim-list* (append *claim-list* (list def)))))
     #+end_src
 
+*** (+theorem)
+
+    #+begin_src scheme
+    (define-syntax +theorem
+      (syntax-rules ()
+        ((_ (name arg ...) body)
+         (+def-fn (quote (dethm name (arg ...) body))))))
+    #+end_src
+
 *** (+proof)
 
     #+begin_src scheme
     (define-syntax +proof
       (syntax-rules ()
         ((_ (name arg ...) exp ...)
-         (+proof/help (quote name)
+         (+proof-fn (quote name)
                       (quote (exp ...))))))
-    #+end_src
 
-*** +proof/help
-
-    #+begin_src scheme
-    (define (+proof/help name rest)
+    (define (+proof-fn name rest)
       (if (find-def name *theorem-list*)
         (cat (newline)
              ("- theorem `~a` has already been proved ~%" name))
@@ -1321,14 +1371,10 @@
     (define-syntax +total
       (syntax-rules ()
         ((_ (name arg ...) exp ...)
-         (+total/help (quote name)
+         (+total-fn (quote name)
                       (quote (exp ...))))))
-    #+end_src
 
-*** +total/help
-
-    #+begin_src scheme
-    (define +total/help +proof/help)
+    (define +total-fn +proof-fn)
     #+end_src
 
 *** (step)
@@ -1337,15 +1383,18 @@
     (define-syntax step
       (syntax-rules ()
         ((_ exp s ...)
-         (J-Bob/step *theorem-list*
+         (step-fn *theorem-list*
            (quote exp)
            (quote (s ...))))))
-    #+end_src
 
-*** *axiom-list*
-
-    #+begin_src scheme
-    (define *axiom-list* '())
+    (define (step-fn defs e steps)
+      (if (defs? '() defs)
+        (if (expr? defs 'any e)
+          (if (steps? defs steps)
+            (rewrite/steps defs e steps)
+            e)
+          e)
+        e))
     #+end_src
 
 *** (+axiom)
@@ -1354,13 +1403,9 @@
     (define-syntax +axiom
       (syntax-rules ()
         ((_ (name arg ...) body)
-         (+axiom/help (quote (dethm name (arg ...) body))))))
-    #+end_src
+         (+axiom-fn (quote (dethm name (arg ...) body))))))
 
-*** +axiom/help
-
-    #+begin_src scheme
-    (define (+axiom/help def)
+    (define (+axiom-fn def)
       (set! *axiom-list* (append *axiom-list* (list def)))
       (set! *claim-list* (append *claim-list* (list def)))
       (set! *theorem-list* (append *theorem-list* (list def))))
