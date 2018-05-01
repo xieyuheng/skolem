@@ -100,6 +100,9 @@
 
 (define pp pretty-print)
 
+(define-macro (note . l)
+  `(quote (note . ,l)))
+
 (define s.car car)
 (define s.cdr cdr)
 (define s.+ +)
@@ -925,7 +928,7 @@
         (cdr (cdr (car pfs))))
       (cdr pfs))))
 
-(defun J-Bob/step (defs e steps)
+(define (J-Bob/step defs e steps)
   (if (defs? '() defs)
     (if (expr? defs 'any e)
       (if (steps? defs steps)
@@ -934,14 +937,14 @@
       e)
     e))
 
-(defun J-Bob/prove (defs pfs)
+(define (J-Bob/prove defs pfs)
   (if (defs? '() defs)
     (if (proofs? defs pfs)
       (rewrite/prove+ defs pfs)
       (quote-c 'nil))
     (quote-c 'nil)))
 
-(defun J-Bob/define (defs pfs)
+(define (J-Bob/define defs pfs)
   (if (defs? '() defs)
     (if (proofs? defs pfs)
       (rewrite/define+ defs pfs)

@@ -811,13 +811,83 @@
       - The totality claim for name
         is the conjunction of (natp m) and the claim for body.
 
-* >< (9. Changing the Rules)
+* (9. Changing the Rules)
 
-*** ><
+*** set?/add-atoms
 
     #+begin_src cicada
+    (+theorem (set?/add-atoms a bs)
+      (if (set? bs)
+        (equal (set? (add-atoms a bs)) 't)
+        't))
 
+    (note
+      (if (atom a)
+        (equal (set? (add-atoms a '())) 't)
+        (if (equal (set? (add-atoms (car a) '())) 't)
+          (if (equal (set? (add-atoms (cdr a) '())) 't)
+            (equal (set? (add-atoms a '())) 't)
+            't)
+          't)))
+
+    (note
+      (if (atom a)
+        (if (set? bs) (equal (set? (add-atoms a bs)) 't) 't)
+        (if (if (set? (add-atoms (cdr a) bs))
+              (equal (set? (add-atoms (car a) (add-atoms (cdr a) bs))) 't)
+              't)
+          (if (if (set? bs)
+                (equal (set? (add-atoms (cdr a) bs)) 't)
+                't)
+            (if (set? bs) (equal (set? (add-atoms a bs)) 't) 't)
+            't)
+          't)))
+
+    (+proof (set?/add-atoms a bs)
+      (add-atoms a bs)
+      )
     #+end_src
+
+*** set?/atoms
+
+    #+begin_src cicada
+    (+theorem (set?/atoms a)
+      (equal (set? (atoms a)) 't))
+
+    (+proof (set?/atoms a)
+      nil
+      ((1 1) (atoms a))
+      ((1) (set?/add-atoms a))
+      (() (equal-same 't)))
+    #+end_src
+
+*** Inductive Premises
+
+    - Given a claim c,
+      a recursive application (name e1 ... en),
+      and variables [x1 ... xn],
+      the inductive premise for this application
+      is c where x1 is e1 , ..., xn is en.
+
+*** Implication
+
+    - An implication states that some premises imply a conclusion.
+      In other words, when the premises [e1 ... en] are true,
+      the conclusion e0 must be true as well.
+
+    - For zero premises, the implication is e0 .
+
+    - For one premise e1, the implication is (if e1 e0 't).
+
+    - For two or more premises [e1 e2 ... en],
+      state that e1 implies that
+      the conjunction of the premises [e2 ... en]
+      imply the conclusion e0.
+
+      for example
+      (if e1 (if e2 e0 't) 't)
+
+*** ><
 
 * >< (10. The Stars Are Aligned)
 

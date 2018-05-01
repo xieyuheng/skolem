@@ -3,6 +3,8 @@
 
 * [todo-stack]
 
+*** drop j-bob interface
+
 *** read the whole imp of j-bob
 
 *** use (<=>) for rewrite instead of (equal)
@@ -16,17 +18,17 @@
 
 *** test framework
 
-*** structural diff
-
 *** read more about ACL2
 
-* [note]
+*** structural diff
 
 *** be able to name rewritting steps
 
+* [note]
+
 * prolog
 
-*** define-macro
+*** (define-macro)
 
     #+begin_src scheme
     ;; code taken from a example in chez repo :: ChezScheme/examples/compat.ss
@@ -96,7 +98,7 @@
                                               (proc (syntax-object->datum x)))))))))])))
     #+end_src
 
-*** cat & orz
+*** (cat) & (orz)
 
     #+begin_src scheme
     (define-macro (cat-one e)
@@ -142,6 +144,13 @@
 
     #+begin_src scheme
     (define pp pretty-print)
+    #+end_src
+
+*** (note)
+
+    #+begin_src scheme
+    (define-macro (note . l)
+      `(quote (note . ,l)))
     #+end_src
 
 * redefine primitive
@@ -1082,7 +1091,7 @@
 *** J-Bob/step
 
     #+begin_src scheme
-    (defun J-Bob/step (defs e steps)
+    (define (J-Bob/step defs e steps)
       (if (defs? '() defs)
         (if (expr? defs 'any e)
           (if (steps? defs steps)
@@ -1095,7 +1104,7 @@
 *** J-Bob/prove
 
     #+begin_src scheme
-    (defun J-Bob/prove (defs pfs)
+    (define (J-Bob/prove defs pfs)
       (if (defs? '() defs)
         (if (proofs? defs pfs)
           (rewrite/prove+ defs pfs)
@@ -1106,7 +1115,7 @@
 *** J-Bob/define
 
     #+begin_src scheme
-    (defun J-Bob/define (defs pfs)
+    (define (J-Bob/define defs pfs)
       (if (defs? '() defs)
         (if (proofs? defs pfs)
           (rewrite/define+ defs pfs)
