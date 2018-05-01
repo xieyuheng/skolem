@@ -1174,9 +1174,3 @@
          ((E) (if-same (atom (car x)) 't))
          (() (if-same (atom x) 't))))))
   #+end_src
-
-* >< chapter 10 proofs
-
-  #+begin_src scheme
-
-  #+end_src

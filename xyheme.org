@@ -7,6 +7,8 @@
 
 *** read the whole imp of j-bob
 
+*** use define in the imp
+
 *** use (<=>) for rewrite instead of (equal)
 
 *** add (+type) and (+union)
@@ -1214,7 +1216,7 @@
          (() (if-true 't 'nil))))))
   #+end_src
 
-* new interface
+* interface
 
 *** *theorem-list*
 
@@ -1435,7 +1437,7 @@
           (equal (< (size (cdr x)) (size x)) 't)))
       #+end_src
 
-***** ><
+***** The Axioms of + and <
 
       #+begin_src scheme
       (+axiom (associate-+ a b c)
