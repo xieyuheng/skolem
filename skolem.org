@@ -1,5 +1,5 @@
-#+property: tangle xyheme.scm
-#+title: xyheme
+#+property: tangle skolem.scm
+#+title: skolem
 
 * [todo-stack]
 
